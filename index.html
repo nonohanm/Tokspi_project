@@ -98,10 +98,18 @@
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
-        // 데이터
         const FEE_RATES = { CRYPTO: 0.0005, RWA: 0.0005, STOCK: 0.0015 };
+        const SWAP_FEES = { STANDARD: 0.0005, KAIA_DISCOUNT: 0.0002 };
         const KAIA_BENEFIT_THRESHOLD = 500;
-        const appState = { displayCurrency: 'Default', linkedAccounts: { kakao: false, line: false }, tradeMode: 'standard', rwaTradeType: 'spot', leverage: 1, position: 'long' };
+        const appState = { 
+            displayCurrency: 'Default', 
+            linkedAccounts: { kakao: false, line: false }, 
+            tradeMode: 'standard', 
+            rwaTradeType: 'spot', 
+            leverage: 1, 
+            position: 'long',
+            swapDirection: 'usdt_to_kkrw'
+        };
         const exchangeRates = { KRW: 1, JPY: 8.5, KKRW: 1000, USDT: 1384.41 };
         const userWallet = { 
             KRW: 1000000, 
@@ -144,7 +152,6 @@
 
         google.charts.load('current', {'packages':['corechart']});
 
-        // 계산기
         function isKaiaBenefitActive() {
             return userWallet.stakedAssets.some(asset => 
                 asset.symbol === 'BITHUMB:KAIAKRW' &&
@@ -155,7 +162,6 @@
         function convertToDisplayCurrency(value, fromCurrency) { if (appState.displayCurrency === 'Default') { return { value: value, currency: 'KRW' }; } const valueInKRW = value * (exchangeRates[fromCurrency] || 1); const displayRate = exchangeRates[appState.displayCurrency] || 1; const convertedValue = valueInKRW / displayRate; return { value: convertedValue, currency: appState.displayCurrency }; }
         async function updateAllPrices() { const assetElements = document.querySelectorAll('.asset-item'); const symbols = Array.from(assetElements).map(el => el.dataset.symbol); const liveData = await mockApi.fetchRealTimeData(symbols); assetElements.forEach(el => { const symbol = el.dataset.symbol; if (liveData[symbol]) { const data = liveData[symbol]; el.dataset.currency = data.currency; const displayData = convertToDisplayCurrency(data.price, data.currency); const priceEl = el.querySelector('.price'); const changeEl = el.querySelector('.change'); priceEl.textContent = `${displayData.value.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${displayData.currency}`; changeEl.textContent = `${data.changePercent.toFixed(2)}%`; priceEl.classList.toggle('text-red-600', data.changePercent > 0); priceEl.classList.toggle('text-blue-600', data.changePercent < 0); changeEl.classList.toggle('text-red-600', data.changePercent > 0); changeEl.classList.toggle('text-blue-600', data.changePercent < 0); } }); }
         
-        // 화면 렌더링 함수들 
         function renderSearchUI() { const container = document.getElementById('search-content'); container.innerHTML = `<div class="relative"><input type="text" id="search-input" placeholder="종목명 검색" class="w-full p-3 pl-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span></div><ul id="search-results-list" class="mt-4"></ul>`; const allStocks = Object.entries(mockApi.basePrices).filter(([, data]) => data.type === 'stock').map(([symbol, data]) => ({...data, symbol})); displaySearchResults(allStocks); }
         function displaySearchResults(assets) { const listContainer = document.getElementById('search-results-list'); if (assets.length === 0) { listContainer.innerHTML = '<li class="text-center text-gray-500 py-4">검색 결과가 없습니다.</li>'; return; } listContainer.innerHTML = assets.map(asset => `<li class="asset-item flex justify-between items-center py-3 border-b cursor-pointer" data-type="stock" data-symbol="${asset.symbol}" data-name="${asset.name}" data-currency="${asset.currency}"><div ><p class="font-semibold">${asset.name}</p><p class="text-sm text-gray-500">${asset.symbol}</p></div><div class="text-right font-semibold price">${asset.price.toLocaleString()} ${asset.currency}</div></li>`).join(''); }
         function renderHistoryUI() { const container = document.getElementById('history-content'); container.innerHTML = `<div class="mb-6"><h2 class="text-lg font-bold text-gray-800 mb-2">포트폴리오 성과</h2><div id="performance-chart" class="w-full h-48 bg-gray-50 rounded-lg"></div></div><div class="mb-6"><h2 class="text-lg font-bold text-gray-800 mb-2">자산 배분</h2><div id="allocation-chart" class="w-full h-64 bg-gray-50 rounded-lg"></div></div><div><h2 class="text-lg font-bold text-gray-800 mb-2">요약</h2><div class="space-y-3"><div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg"><p class="font-semibold">이번년도 수익률</p><p class="font-bold text-red-600">+15.72%</p></div><div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg"><p class="font-semibold">이번년도 배당금</p><p class="font-bold text-blue-600">35,000 KRW</p></div><div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg"><p class="font-semibold">총 수익률</p><p class="font-bold text-red-600">+23.40%</p></div></div></div>`; google.charts.setOnLoadCallback(drawPerformanceChart); google.charts.setOnLoadCallback(drawAllocationChart); }
@@ -227,17 +233,65 @@
                                 <button class="unstake-btn bg-red-500 text-white px-3 py-2 rounded text-sm font-bold" data-stake-index="${index}">해지</button>
                             </li>`;
                 }).join('');
+            
+            const swapHtml = `
+                <div id="swap-container" class="p-4 border rounded-lg space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span id="swap-from-label" class="font-bold text-lg">USDT</span>
+                        <button id="swap-toggle-btn" class="p-2 hover:bg-gray-200 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                            </svg>
+                        </button>
+                        <span id="swap-to-label" class="font-bold text-lg text-gray-500">KKRW</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center">
+                            <input type="number" id="swap-input" class="w-full p-2 border rounded-l-md" placeholder="USDT 수량">
+                            <button id="swap-max-btn" class="bg-gray-200 px-3 py-2 rounded-r-md font-semibold text-xs">최대</button>
+                        </div>
+                        <p id="swap-balance" class="text-sm text-gray-600 text-right mt-1"></p>
+                    </div>
+                    <div class="text-xs text-gray-500 space-y-1">
+                        <p id="swap-fee" class="flex justify-between"><span>수수료:</span> <span>-</span></p>
+                        <p id="swap-receive" class="flex justify-between font-bold text-gray-800"><span>예상 수령:</span> <span>-</span></p>
+                    </div>
+                    <button id="swap-execute-btn" class="w-full p-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 text-sm">교환하기</button>
+                </div>`;
 
             const kakaoLinked = appState.linkedAccounts.kakao;
             const lineLinked = appState.linkedAccounts.line;
-
             const rwaAssets = Object.keys(userWallet.assets).filter(symbol => userWallet.assets[symbol].rwaOriginalSymbol && userWallet.assets[symbol].isSpot).map(symbol => ({...userWallet.assets[symbol], rwaSymbol: symbol }));
             const rwaHtml = rwaAssets.length === 0 ? '<p class="text-sm text-gray-500">교환 가능한 RWA 현물 토큰이 없습니다.</p>' : rwaAssets.map(asset => `<li class="flex justify-between items-center py-3 border-b" data-rwa-symbol="${asset.rwaSymbol}"><div><p class="font-semibold">${asset.name}</p><p class="text-sm text-gray-500">보유수량: ${asset.quantity.toLocaleString()}</p></div><button class="swap-rwa-btn bg-green-500 text-white px-4 py-2 rounded text-sm font-bold">교환하기</button></li>`).join('');
 
-            container.innerHTML = `<h2 class="text-lg font-bold text-gray-800 mb-4">스테이킹 현황</h2>${kaiaBenefitHtml}<ul id="staked-assets-list">${stakedAssetsHtml}</ul><hr class="my-6"><h2 class="text-lg font-bold text-gray-800 mb-4">통화 설정</h2><div class="space-y-2 mb-8">${currencyButtonsHtml}</div><h2 class="text-lg font-bold text-gray-800 mb-4">계정 연동</h2><p class="text-sm text-gray-500 -mt-2 mb-4">연동하면 친구들에게 간편하게 송금이 가능해요!</p><div class="space-y-2 mb-8"><div class="flex justify-between items-center p-3 rounded-md ${kakaoLinked ? 'bg-yellow-100' : 'bg-gray-100'}"><p class="font-semibold">카카오 계정</p><button class="link-account-btn px-4 py-2 text-sm font-bold rounded ${kakaoLinked ? 'bg-gray-400 text-white' : 'bg-yellow-400'}" data-platform="kakao">${kakaoLinked ? '연동됨' : '연동하기'}</button></div><div class="flex justify-between items-center p-3 rounded-md ${lineLinked ? 'bg-green-100' : 'bg-gray-100'}"><p class="font-semibold">라인 계정</p><button class="link-account-btn px-4 py-2 text-sm font-bold rounded ${lineLinked ? 'bg-gray-400 text-white' : 'bg-green-500 text-white'}" data-platform="line">${lineLinked ? '연동됨' : '연동하기'}</button></div></div><h2 class="text-lg font-bold text-gray-800 mb-4">RWA 토큰 교환 (현물)</h2><ul id="rwa-swap-list">${rwaHtml}</ul>`; 
+            container.innerHTML = `<h2 class="text-lg font-bold text-gray-800 mb-4">스테이킹 현황</h2>${kaiaBenefitHtml}<ul id="staked-assets-list">${stakedAssetsHtml}</ul> <hr class="my-6"> <h2 class="text-lg font-bold text-gray-800 mb-4">암호화폐 교환</h2>${swapHtml}<hr class="my-6"><h2 class="text-lg font-bold text-gray-800 mb-4">통화 설정</h2><div class="space-y-2 mb-8">${currencyButtonsHtml}</div><h2 class="text-lg font-bold text-gray-800 mb-4">계정 연동</h2><p class="text-sm text-gray-500 -mt-2 mb-4">연동하면 친구들에게 간편하게 송금이 가능해요!</p><div class="space-y-2 mb-8"><div class="flex justify-between items-center p-3 rounded-md ${kakaoLinked ? 'bg-yellow-100' : 'bg-gray-100'}"><p class="font-semibold">카카오 계정</p><button class="link-account-btn px-4 py-2 text-sm font-bold rounded ${kakaoLinked ? 'bg-gray-400 text-white' : 'bg-yellow-400'}" data-platform="kakao">${kakaoLinked ? '연동됨' : '연동하기'}</button></div><div class="flex justify-between items-center p-3 rounded-md ${lineLinked ? 'bg-green-100' : 'bg-gray-100'}"><p class="font-semibold">라인 계정</p><button class="link-account-btn px-4 py-2 text-sm font-bold rounded ${lineLinked ? 'bg-gray-400 text-white' : 'bg-green-500 text-white'}" data-platform="line">${lineLinked ? '연동됨' : '연동하기'}</button></div></div><h2 class="text-lg font-bold text-gray-800 mb-4">RWA 토큰 교환 (현물)</h2><ul id="rwa-swap-list">${rwaHtml}</ul>`; 
+            
+            updateSwapUI();
         }
 
-        // 거래
+        function updateSwapUI() {
+            const fromLabel = document.getElementById('swap-from-label');
+            const toLabel = document.getElementById('swap-to-label');
+            const input = document.getElementById('swap-input');
+            const balanceEl = document.getElementById('swap-balance');
+
+            if(appState.swapDirection === 'usdt_to_kkrw') {
+                fromLabel.textContent = 'USDT';
+                toLabel.textContent = 'KKRW';
+                input.placeholder = 'USDT 수량';
+                const usdtBalance = userWallet.assets['BITHUMB:USDTKRW']?.quantity || 0;
+                balanceEl.textContent = `보유: ${usdtBalance.toLocaleString()} USDT`;
+            } else {
+                fromLabel.textContent = 'KKRW';
+                toLabel.textContent = 'USDT';
+                input.placeholder = 'KKRW 수량';
+                const kkrwBalance = userWallet.assets['KKRW']?.quantity || 0;
+                balanceEl.textContent = `보유: ${kkrwBalance.toLocaleString()} KKRW`;
+            }
+            input.value = '';
+            input.dispatchEvent(new Event('input'));
+        }
+
         function refreshAllUI() { const currentTab = document.querySelector('.nav-item.text-blue-600')?.dataset.tab; if (tabRenderFunctions[currentTab]) tabRenderFunctions[currentTab](); updateAllPrices(); }
         function loadCryptoUI(symbol, currentPrice, currency) { const tradeUiHtml = getTradeUiHtml(currentPrice, currency, symbol); detailContentContainer.innerHTML = `<div id="chart-container" class="w-full" style="height: 400px;"></div> ${tradeUiHtml}`; if (symbol === 'KKRW') { document.getElementById('chart-container').innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">1,000원 고정 스테이블 코인입니다.</div>`; } else { new TradingView.widget({ "autosize": true, "symbol": symbol, "interval": "60", "timezone": "Asia/Seoul", "theme": "light", "style": "1", "locale": "kr", "container_id": "chart-container" }); } }
         function loadStockUI(symbol, currentPrice, currency) { appState.tradeMode = 'standard'; appState.rwaTradeType = 'spot'; appState.leverage = 1; appState.position = 'long'; const tradeModeSwitcherHtml = `<div class="p-4 bg-gray-100"><div id="trade-mode-toggle" class="relative w-full h-10 bg-gray-300 rounded-lg flex items-center cursor-pointer"><div id="trade-mode-slider" class="absolute h-full w-1/2 bg-white rounded-lg shadow-md transition-transform transform left-0"></div><div class="w-1/2 text-center z-10 font-bold text-blue-600">기본 거래</div><div class="w-1/2 text-center z-10 font-semibold text-gray-600">RWA 체인 거래</div></div></div>`; const tradeUiHtml = getTradeUiHtml(currentPrice, currency, symbol); detailContentContainer.innerHTML = `${tradeModeSwitcherHtml}<div id="chart-container" class="w-full" style="height: 400px;"></div> ${tradeUiHtml}`; google.charts.setOnLoadCallback(() => drawCandlestickChart(symbol)); }
@@ -345,7 +399,7 @@
             let kaiaBonusClasses = '';
             if (symbol === 'BITHUMB:KAIAKRW') {
                 kaiaBonusClasses = 'border-dashed border-2 border-amber-500';
-                kaiaBonusHtml = `<div class="mt-2 p-2 bg-amber-100 text-amber-800 text-xs rounded-md text-center">✨ KAIA 500개 이상 14일 스테이킹하면 <strong>특별 혜택</strong>이 제공됩니다!</div>`;
+                kaiaBonusHtml = `<div class="mt-2 p-2 bg-amber-100 text-amber-800 text-xs rounded-md text-center">✨ KAIA 500개 이상 14일 스테이킹하면 <strong>USDT &lt;-&gt; KKRW 환전 수수료</strong> 우대!</div>`;
             }
 
             const contentHtml = `
