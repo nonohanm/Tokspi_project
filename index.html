@@ -108,7 +108,8 @@
             rwaTradeType: 'spot', 
             leverage: 1, 
             position: 'long',
-            swapDirection: 'usdt_to_kkrw'
+            swapDirection: 'usdt_to_kkrw',
+            hasVoted: false
         };
         const exchangeRates = { KRW: 1, JPY: 8.5, KKRW: 1000, USDT: 1384.41 };
         const userWallet = { 
@@ -123,6 +124,12 @@
                 '4689.T': { name: '라인', ticker: 'LINE', quantity: 20 } 
             },
             stakedAssets: [] 
+        };
+        let votingStatus = {
+            '한화오션': 12000,
+            '신한지주': 8500,
+            'SK오션플랜트': 15000,
+            '삼성생명': 7800,
         };
         const mockApi = { basePrices: { 
             "BITHUMB:BTCKRW": { name: '비트코인', type: 'crypto', price: 9437280.96, currency: 'KRW', apy: 3.0 }, 
@@ -143,7 +150,11 @@
             '005380.KS': { name: '현대차', type: 'stock', price: 217500, currency: 'KRW' },
             '105560.KS': { name: 'KB금융', type: 'stock', price: 113200, currency: 'KRW' },
             '329180.KS': { name: 'HD현대중공업', type: 'stock', price: 477000, currency: 'KRW' },
-            '034020.KS': { name: '두산에너빌리티', type: 'stock', price: 65500, currency: 'KRW' }
+            '034020.KS': { name: '두산에너빌리티', type: 'stock', price: 65500, currency: 'KRW' },
+            '042660.KS': { name: '한화오션', type: 'stock', price: 29000, currency: 'KRW' },
+            '055550.KS': { name: '신한지주', type: 'stock', price: 45000, currency: 'KRW' },
+            '100090.KS': { name: 'SK오션플랜트', type: 'stock', price: 20700, currency: 'KRW' },
+            '032830.KS': { name: '삼성생명', type: 'stock', price: 68000, currency: 'KRW' }
         }, fetchRealTimeData: async function(symbols) { await new Promise(resolve => setTimeout(resolve, 300)); const results = {}; symbols.forEach(symbol => { if (this.basePrices[symbol]) { const baseInfo = this.basePrices[symbol]; let currentPrice = baseInfo.price; let changePercent = 0; if (symbol !== 'KKRW') { const fluctuation = baseInfo.price * 0.03; const change = (Math.random() - 0.5) * fluctuation; currentPrice = baseInfo.price + change; changePercent = (change / baseInfo.price) * 100; } results[symbol] = { price: currentPrice, changePercent: changePercent, currency: baseInfo.currency }; } }); return results; } };
         const Hangul = { CHO: ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"], JUNG: ["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"], JONG: ["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"], disassemble: function(text) { let result = ""; for (let i = 0; i < text.length; i++) { const charCode = text.charCodeAt(i); if (charCode >= 44032 && charCode <= 55203) { const jong = charCode - 44032; const cho = Math.floor(jong / 588); const jung = Math.floor((jong - cho * 588) / 28); result += this.CHO[cho] + this.JUNG[jung]; if (jong % 28 > 0) result += this.JONG[jong % 28]; } else { result += text[i]; } } return result; }, includes: function(base, search) { if (!search) return true; return this.disassemble(base).includes(this.disassemble(search)); } };
         const mockFriends = [ { name: '김민준', platform: 'kakao' }, { name: '이서연', platform: 'line' }, { name: '박도윤', platform: 'kakao' }, { name: '최지우', platform: 'line' } ];
@@ -159,6 +170,13 @@
                 asset.quantity >= KAIA_BENEFIT_THRESHOLD
             );
         }
+        function getTotalKaia() {
+            const walletKaia = userWallet.assets['BITHUMB:KAIAKRW']?.quantity || 0;
+            const stakedKaia = userWallet.stakedAssets
+                .filter(asset => asset.symbol === 'BITHUMB:KAIAKRW')
+                .reduce((total, asset) => total + asset.quantity, 0);
+            return walletKaia + stakedKaia;
+        }
         function convertToDisplayCurrency(value, fromCurrency) { if (appState.displayCurrency === 'Default') { return { value: value, currency: 'KRW' }; } const valueInKRW = value * (exchangeRates[fromCurrency] || 1); const displayRate = exchangeRates[appState.displayCurrency] || 1; const convertedValue = valueInKRW / displayRate; return { value: convertedValue, currency: appState.displayCurrency }; }
         async function updateAllPrices() { const assetElements = document.querySelectorAll('.asset-item'); const symbols = Array.from(assetElements).map(el => el.dataset.symbol); const liveData = await mockApi.fetchRealTimeData(symbols); assetElements.forEach(el => { const symbol = el.dataset.symbol; if (liveData[symbol]) { const data = liveData[symbol]; el.dataset.currency = data.currency; const displayData = convertToDisplayCurrency(data.price, data.currency); const priceEl = el.querySelector('.price'); const changeEl = el.querySelector('.change'); priceEl.textContent = `${displayData.value.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${displayData.currency}`; changeEl.textContent = `${data.changePercent.toFixed(2)}%`; priceEl.classList.toggle('text-red-600', data.changePercent > 0); priceEl.classList.toggle('text-blue-600', data.changePercent < 0); changeEl.classList.toggle('text-red-600', data.changePercent > 0); changeEl.classList.toggle('text-blue-600', data.changePercent < 0); } }); }
         
@@ -167,6 +185,7 @@
         function renderHistoryUI() { const container = document.getElementById('history-content'); container.innerHTML = `<div class="mb-6"><h2 class="text-lg font-bold text-gray-800 mb-2">포트폴리오 성과</h2><div id="performance-chart" class="w-full h-48 bg-gray-50 rounded-lg"></div></div><div class="mb-6"><h2 class="text-lg font-bold text-gray-800 mb-2">자산 배분</h2><div id="allocation-chart" class="w-full h-64 bg-gray-50 rounded-lg"></div></div><div><h2 class="text-lg font-bold text-gray-800 mb-2">요약</h2><div class="space-y-3"><div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg"><p class="font-semibold">이번년도 수익률</p><p class="font-bold text-red-600">+15.72%</p></div><div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg"><p class="font-semibold">이번년도 배당금</p><p class="font-bold text-blue-600">35,000 KRW</p></div><div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg"><p class="font-semibold">총 수익률</p><p class="font-bold text-red-600">+23.40%</p></div></div></div>`; google.charts.setOnLoadCallback(drawPerformanceChart); google.charts.setOnLoadCallback(drawAllocationChart); }
         function renderAssetsUI() {
             const container = document.getElementById('transfer-content');
+            const voteButtonHtml = `<button id="go-to-vote-btn" class="w-full p-4 mb-4 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700">다음 토큰화 주식 투표하기 🗳️</button>`;
             const fiatHtml = Object.keys(userWallet).filter(k => k !== 'assets' && k !== 'stakedAssets').map(key => {
                 const asset = { name: key === 'KRW' ? '대한민국 원' : '일본 엔', ticker: key, quantity: userWallet[key] };
                 return `<li class="flex justify-between items-center py-4 border-b"><div><p class="font-semibold">${asset.name} (${asset.ticker})</p><p class="text-sm text-gray-600">보유액: ${asset.quantity.toLocaleString()}</p></div><button class="fiat-send-btn bg-blue-500 text-white px-4 py-2 rounded text-sm font-bold hover:bg-blue-600" data-asset-symbol="${asset.ticker}">입금/송금</button></li>`
@@ -209,7 +228,7 @@
                 return `<li class="flex justify-between items-center py-4 border-b"><div><p class="font-semibold">${asset.name} (${asset.ticker})</p><p class="text-sm text-gray-600">보유수량: ${asset.quantity.toLocaleString()}</p></div></li>`;
             }).join('');
 
-            container.innerHTML = `<h2 class="text-lg font-bold text-gray-800 mb-2">보유 현금</h2><ul>${fiatHtml}</ul><h2 class="text-lg font-bold text-gray-800 mt-8 mb-2">암호화폐</h2><ul>${cryptoHtml}</ul><h2 class="text-lg font-bold text-gray-800 mt-8 mb-2">보유 주식</h2><ul>${stockHtml}</ul>`;
+            container.innerHTML = `${voteButtonHtml}<h2 class="text-lg font-bold text-gray-800 mb-2">보유 현금</h2><ul>${fiatHtml}</ul><h2 class="text-lg font-bold text-gray-800 mt-8 mb-2">암호화폐</h2><ul>${cryptoHtml}</ul><h2 class="text-lg font-bold text-gray-800 mt-8 mb-2">보유 주식</h2><ul>${stockHtml}</ul>`;
         }
         function renderSettingsUI() {
             const container = document.getElementById('more-content');
@@ -233,7 +252,7 @@
                                 <button class="unstake-btn bg-red-500 text-white px-3 py-2 rounded text-sm font-bold" data-stake-index="${index}">해지</button>
                             </li>`;
                 }).join('');
-            
+
             const swapHtml = `
                 <div id="swap-container" class="p-4 border rounded-lg space-y-3">
                     <div class="flex justify-between items-center">
@@ -245,6 +264,7 @@
                         </button>
                         <span id="swap-to-label" class="font-bold text-lg text-gray-500">KKRW</span>
                     </div>
+                     <div class="text-center text-xs text-gray-400 -mt-2">on Kaia Network</div>
                     <div>
                         <div class="flex items-center">
                             <input type="number" id="swap-input" class="w-full p-2 border rounded-l-md" placeholder="USDT 수량">
@@ -258,13 +278,13 @@
                     </div>
                     <button id="swap-execute-btn" class="w-full p-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 text-sm">교환하기</button>
                 </div>`;
-
+            
             const kakaoLinked = appState.linkedAccounts.kakao;
             const lineLinked = appState.linkedAccounts.line;
             const rwaAssets = Object.keys(userWallet.assets).filter(symbol => userWallet.assets[symbol].rwaOriginalSymbol && userWallet.assets[symbol].isSpot).map(symbol => ({...userWallet.assets[symbol], rwaSymbol: symbol }));
             const rwaHtml = rwaAssets.length === 0 ? '<p class="text-sm text-gray-500">교환 가능한 RWA 현물 토큰이 없습니다.</p>' : rwaAssets.map(asset => `<li class="flex justify-between items-center py-3 border-b" data-rwa-symbol="${asset.rwaSymbol}"><div><p class="font-semibold">${asset.name}</p><p class="text-sm text-gray-500">보유수량: ${asset.quantity.toLocaleString()}</p></div><button class="swap-rwa-btn bg-green-500 text-white px-4 py-2 rounded text-sm font-bold">교환하기</button></li>`).join('');
 
-            container.innerHTML = `<h2 class="text-lg font-bold text-gray-800 mb-4">스테이킹 현황</h2>${kaiaBenefitHtml}<ul id="staked-assets-list">${stakedAssetsHtml}</ul> <hr class="my-6"> <h2 class="text-lg font-bold text-gray-800 mb-4">암호화폐 교환</h2>${swapHtml}<hr class="my-6"><h2 class="text-lg font-bold text-gray-800 mb-4">통화 설정</h2><div class="space-y-2 mb-8">${currencyButtonsHtml}</div><h2 class="text-lg font-bold text-gray-800 mb-4">계정 연동</h2><p class="text-sm text-gray-500 -mt-2 mb-4">연동하면 친구들에게 간편하게 송금이 가능해요!</p><div class="space-y-2 mb-8"><div class="flex justify-between items-center p-3 rounded-md ${kakaoLinked ? 'bg-yellow-100' : 'bg-gray-100'}"><p class="font-semibold">카카오 계정</p><button class="link-account-btn px-4 py-2 text-sm font-bold rounded ${kakaoLinked ? 'bg-gray-400 text-white' : 'bg-yellow-400'}" data-platform="kakao">${kakaoLinked ? '연동됨' : '연동하기'}</button></div><div class="flex justify-between items-center p-3 rounded-md ${lineLinked ? 'bg-green-100' : 'bg-gray-100'}"><p class="font-semibold">라인 계정</p><button class="link-account-btn px-4 py-2 text-sm font-bold rounded ${lineLinked ? 'bg-gray-400 text-white' : 'bg-green-500 text-white'}" data-platform="line">${lineLinked ? '연동됨' : '연동하기'}</button></div></div><h2 class="text-lg font-bold text-gray-800 mb-4">RWA 토큰 교환 (현물)</h2><ul id="rwa-swap-list">${rwaHtml}</ul>`; 
+            container.innerHTML = `<h2 class="text-lg font-bold text-gray-800 mb-4">스테이킹 현황</h2>${kaiaBenefitHtml}<ul id="staked-assets-list">${stakedAssetsHtml}</ul> <hr class="my-6"> <h2 class="text-lg font-bold text-gray-800 mb-4">암호화폐 교환</h2>${swapHtml} <hr class="my-6"> <h2 class="text-lg font-bold text-gray-800 mb-4">통화 설정</h2><div class="space-y-2 mb-8">${currencyButtonsHtml}</div><h2 class="text-lg font-bold text-gray-800 mb-4">계정 연동</h2><p class="text-sm text-gray-500 -mt-2 mb-4">연동하면 친구들에게 간편하게 송금이 가능해요!</p><div class="space-y-2 mb-8"><div class="flex justify-between items-center p-3 rounded-md ${kakaoLinked ? 'bg-yellow-100' : 'bg-gray-100'}"><p class="font-semibold">카카오 계정</p><button class="link-account-btn px-4 py-2 text-sm font-bold rounded ${kakaoLinked ? 'bg-gray-400 text-white' : 'bg-yellow-400'}" data-platform="kakao">${kakaoLinked ? '연동됨' : '연동하기'}</button></div><div class="flex justify-between items-center p-3 rounded-md ${lineLinked ? 'bg-green-100' : 'bg-gray-100'}"><p class="font-semibold">라인 계정</p><button class="link-account-btn px-4 py-2 text-sm font-bold rounded ${lineLinked ? 'bg-gray-400 text-white' : 'bg-green-500 text-white'}" data-platform="line">${lineLinked ? '연동됨' : '연동하기'}</button></div></div><h2 class="text-lg font-bold text-gray-800 mb-4">RWA 토큰 교환 (현물)</h2><ul id="rwa-swap-list">${rwaHtml}</ul>`; 
             
             updateSwapUI();
         }
@@ -274,24 +294,39 @@
             const toLabel = document.getElementById('swap-to-label');
             const input = document.getElementById('swap-input');
             const balanceEl = document.getElementById('swap-balance');
+            const feeEl = document.getElementById('swap-fee').querySelector('span:last-child');
+            const receiveEl = document.getElementById('swap-receive').querySelector('span:last-child');
+            
+            const amount = parseFloat(input.value) || 0;
+            let fee = 0, receivedAmount = 0, feeRate = 0;
 
             if(appState.swapDirection === 'usdt_to_kkrw') {
                 fromLabel.textContent = 'USDT';
                 toLabel.textContent = 'KKRW';
                 input.placeholder = 'USDT 수량';
-                const usdtBalance = userWallet.assets['BITHUMB:USDTKRW']?.quantity || 0;
-                balanceEl.textContent = `보유: ${usdtBalance.toLocaleString()} USDT`;
+                balanceEl.textContent = `보유: ${(userWallet.assets['BITHUMB:USDTKRW']?.quantity || 0).toLocaleString()} USDT`;
+                
+                feeRate = isKaiaBenefitActive() ? SWAP_FEES.KAIA_DISCOUNT : SWAP_FEES.STANDARD;
+                fee = amount * feeRate;
+                receivedAmount = (amount - fee) * exchangeRates.USDT / exchangeRates.KKRW;
+
+                feeEl.textContent = `${fee.toFixed(4)} USDT (${(feeRate * 100).toFixed(2)}%)`;
+                receiveEl.textContent = `${receivedAmount.toLocaleString()} KKRW`;
             } else {
                 fromLabel.textContent = 'KKRW';
                 toLabel.textContent = 'USDT';
                 input.placeholder = 'KKRW 수량';
-                const kkrwBalance = userWallet.assets['KKRW']?.quantity || 0;
-                balanceEl.textContent = `보유: ${kkrwBalance.toLocaleString()} KKRW`;
-            }
-            input.value = '';
-            input.dispatchEvent(new Event('input'));
-        }
+                balanceEl.textContent = `보유: ${(userWallet.assets['KKRW']?.quantity || 0).toLocaleString()} KKRW`;
 
+                feeRate = SWAP_FEES.STANDARD;
+                fee = amount * feeRate;
+                receivedAmount = (amount - fee) * exchangeRates.KKRW / exchangeRates.USDT;
+
+                feeEl.textContent = `${fee.toFixed(4)} KKRW (${(feeRate * 100).toFixed(2)}%)`;
+                receiveEl.textContent = `${receivedAmount.toLocaleString()} USDT`;
+            }
+        }
+        
         function refreshAllUI() { const currentTab = document.querySelector('.nav-item.text-blue-600')?.dataset.tab; if (tabRenderFunctions[currentTab]) tabRenderFunctions[currentTab](); updateAllPrices(); }
         function loadCryptoUI(symbol, currentPrice, currency) { const tradeUiHtml = getTradeUiHtml(currentPrice, currency, symbol); detailContentContainer.innerHTML = `<div id="chart-container" class="w-full" style="height: 400px;"></div> ${tradeUiHtml}`; if (symbol === 'KKRW') { document.getElementById('chart-container').innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">1,000원 고정 스테이블 코인입니다.</div>`; } else { new TradingView.widget({ "autosize": true, "symbol": symbol, "interval": "60", "timezone": "Asia/Seoul", "theme": "light", "style": "1", "locale": "kr", "container_id": "chart-container" }); } }
         function loadStockUI(symbol, currentPrice, currency) { appState.tradeMode = 'standard'; appState.rwaTradeType = 'spot'; appState.leverage = 1; appState.position = 'long'; const tradeModeSwitcherHtml = `<div class="p-4 bg-gray-100"><div id="trade-mode-toggle" class="relative w-full h-10 bg-gray-300 rounded-lg flex items-center cursor-pointer"><div id="trade-mode-slider" class="absolute h-full w-1/2 bg-white rounded-lg shadow-md transition-transform transform left-0"></div><div class="w-1/2 text-center z-10 font-bold text-blue-600">기본 거래</div><div class="w-1/2 text-center z-10 font-semibold text-gray-600">RWA 체인 거래</div></div></div>`; const tradeUiHtml = getTradeUiHtml(currentPrice, currency, symbol); detailContentContainer.innerHTML = `${tradeModeSwitcherHtml}<div id="chart-container" class="w-full" style="height: 400px;"></div> ${tradeUiHtml}`; google.charts.setOnLoadCallback(() => drawCandlestickChart(symbol)); }
@@ -435,6 +470,44 @@
             detailContentContainer.innerHTML = contentHtml;
             document.getElementById('stake-quantity-input').dispatchEvent(new Event('input'));
         }
+        function loadVotingUI() {
+            document.getElementById('detail-name').textContent = '다음 토큰화 주식 투표';
+            document.getElementById('detail-symbol').textContent = 'KAIA 홀더 투표';
+            mainView.classList.add('hidden');
+            detailView.classList.remove('hidden');
+            
+            const totalKaia = getTotalKaia();
+            const voteOptionsHtml = Object.keys(votingStatus).map(option => `
+                <button class="vote-option-btn w-full p-4 border rounded-lg text-left ${appState.hasVoted ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'hover:bg-gray-100'}" data-option="${option}" ${appState.hasVoted ? 'disabled' : ''}>
+                    ${option}
+                </button>
+            `).join('');
+
+            const contentHtml = `
+                <div class="p-4">
+                    <div id="vote-chart" class="w-full h-64"></div>
+                    <div class="text-center my-4">
+                        <p class="text-gray-600">나의 투표권</p>
+                        <p class="text-2xl font-bold text-indigo-600">${totalKaia.toLocaleString()} 개</p>
+                    </div>
+                    <div id="vote-options-container" class="space-y-2">
+                        ${appState.hasVoted ? '<p class="text-center text-green-600 font-bold">투표에 참여해주셔서 감사합니다.</p>' : voteOptionsHtml}
+                    </div>
+                </div>
+            `;
+            detailContentContainer.innerHTML = contentHtml;
+            google.charts.setOnLoadCallback(drawVoteChart);
+        }
+
+        function drawVoteChart() {
+            const data = google.visualization.arrayToDataTable([
+                ['후보', '득표수'],
+                ...Object.entries(votingStatus)
+            ]);
+            const options = { title: '현재 투표 현황', pieHole: 0.4, legend: { position: 'bottom' } };
+            const chart = new google.visualization.PieChart(document.getElementById('vote-chart'));
+            chart.draw(data, options);
+        }
         function drawCandlestickChart(symbol) { const data = google.visualization.arrayToDataTable(mockCandleData(symbol), true); const options = { legend: 'none', candlestick: { fallingColor: { strokeWidth: 0, fill: '#00F' }, risingColor: { strokeWidth: 0, fill: '#F00' }}, hAxis: { textPosition: 'none' }, vAxis: { gridlines: { color: '#f0f0f0' } } }; const chart = new google.visualization.CandlestickChart(document.getElementById('chart-container')); chart.draw(data, options); }
         function mockCandleData(symbol) { const data = []; let lastClose = mockApi.basePrices[symbol]?.price || 50000; for (let i = 0; i < 60; i++) { const date = new Date(); date.setDate(date.getDate() - (60 - i)); const f = lastClose * 0.05, o = lastClose + (Math.random() - 0.5) * f, c = o + (Math.random() - 0.5) * f, h = Math.max(o, c) + Math.random() * (f*0.5), l = Math.min(o, c) - Math.random() * (f*0.5); data.push([date, l, o, c, h]); lastClose = c; } return data; }
         function drawPerformanceChart() { const data = google.visualization.arrayToDataTable([ ['월', '가치'], ['1월', 1000], ['2월', 1170], ['3월', 1260], ['4월', 1330], ['5월', 1400], ['6월', 1530], ['7월', 1600], ['8월', 1720] ]); const options = { title: '포트폴리오 가치 추이 (KRW)', curveType: 'function', legend: { position: 'bottom' }, hAxis: { textPosition: 'none' }, vAxis: { format: 'short' } }; const chart = new google.visualization.LineChart(document.getElementById('performance-chart')); chart.draw(data, options); }
@@ -462,6 +535,9 @@
                 const stakeDurationBtn = closest('.stake-duration-btn'); if (stakeDurationBtn) { document.querySelectorAll('.stake-duration-btn').forEach(btn => { btn.classList.remove('border-blue-500', 'bg-blue-100', 'text-blue-700'); btn.classList.add('border'); }); stakeDurationBtn.classList.add('border-blue-500', 'bg-blue-100', 'text-blue-700'); stakeDurationBtn.classList.remove('border'); document.getElementById('stake-quantity-input').dispatchEvent(new Event('input')); return; }
                 const confirmStakeBtn = closest('#confirm-stake-btn'); if (confirmStakeBtn) { const symbol = confirmStakeBtn.dataset.symbol; const quantity = parseFloat(document.getElementById('stake-quantity-input').value); const selectedDurationBtn = document.querySelector('.stake-duration-btn.border-blue-500'); const duration = parseInt(selectedDurationBtn.dataset.duration); const apy = parseFloat(selectedDurationBtn.dataset.apy); const asset = userWallet.assets[symbol]; if (isNaN(quantity) || quantity <= 0) { alert('올바른 수량을 입력하세요.'); return; } if (!asset || asset.quantity < quantity) { alert('보유 수량이 부족합니다.'); return; } asset.quantity -= quantity; if(asset.quantity < 1e-9) delete userWallet.assets[symbol]; userWallet.stakedAssets.push({ symbol: symbol, quantity: quantity, startDate: Date.now(), duration: duration, apy: apy }); alert(`${quantity.toLocaleString()} ${asset.ticker}를 ${duration}일간 스테이킹 시작합니다.`); detailView.classList.add('hidden'); mainView.classList.remove('hidden'); detailContentContainer.innerHTML = ''; const assetsTab = document.querySelector('.nav-item[data-tab="transfer"]'); if (assetsTab) { assetsTab.click(); } return; }
                 const unstakeBtn = closest('.unstake-btn'); if (unstakeBtn) { const confirmed = confirm('스테이킹을 중도 해지하면 보상을 받을 수 없습니다. 정말 해지하시겠습니까?'); if(confirmed) { const index = parseInt(unstakeBtn.dataset.stakeIndex); const stakedAsset = userWallet.stakedAssets.splice(index, 1)[0]; if(userWallet.assets[stakedAsset.symbol]) { userWallet.assets[stakedAsset.symbol].quantity += stakedAsset.quantity; } else { const originalAsset = mockApi.basePrices[stakedAsset.symbol]; userWallet.assets[stakedAsset.symbol] = { name: originalAsset.name, ticker: originalAsset.name.split(' ')[0], quantity: stakedAsset.quantity }; } renderSettingsUI(); } return; }
+                const swapToggleBtn = closest('#swap-toggle-btn'); if(swapToggleBtn) { appState.swapDirection = (appState.swapDirection === 'usdt_to_kkrw') ? 'kkrw_to_usdt' : 'usdt_to_kkrw'; updateSwapUI(); return; }
+                const swapMaxBtn = closest('#swap-max-btn'); if (swapMaxBtn) { const input = document.getElementById('swap-input'); if (appState.swapDirection === 'usdt_to_kkrw') { input.value = userWallet.assets['BITHUMB:USDTKRW']?.quantity || 0; } else { input.value = userWallet.assets['KKRW']?.quantity || 0; } input.dispatchEvent(new Event('input')); return; }
+                const swapExecuteBtn = closest('#swap-execute-btn'); if (swapExecuteBtn) { const input = document.getElementById('swap-input'); const amount = parseFloat(input.value); if(isNaN(amount) || amount <= 0){ alert('올바른 수량을 입력하세요.'); return; } if (appState.swapDirection === 'usdt_to_kkrw') { const usdtWallet = userWallet.assets['BITHUMB:USDTKRW']; if(!usdtWallet || usdtWallet.quantity < amount) { alert('USDT 보유 수량이 부족합니다.'); return; } const feeRate = isKaiaBenefitActive() ? SWAP_FEES.KAIA_DISCOUNT : SWAP_FEES.STANDARD; const fee = amount * feeRate; const receivedKkrw = (amount - fee) * exchangeRates.USDT / exchangeRates.KKRW; usdtWallet.quantity -= amount; if (!userWallet.assets['KKRW']) userWallet.assets['KKRW'] = { name: 'KKRW', ticker: 'KKRW', quantity: 0 }; userWallet.assets['KKRW'].quantity += receivedKkrw; alert(`${amount.toLocaleString()} USDT 교환 완료!\n수수료(${(feeRate * 100).toFixed(2)}%): ${fee.toFixed(4)} USDT\n최종 지급: ${receivedKkrw.toLocaleString()} KKRW`); } else { const kkrwWallet = userWallet.assets['KKRW']; if(!kkrwWallet || kkrwWallet.quantity < amount) { alert('KKRW 보유 수량이 부족합니다.'); return; } const feeRate = SWAP_FEES.STANDARD; const fee = amount * feeRate; const receivedUsdt = (amount - fee) * exchangeRates.KKRW / exchangeRates.USDT; kkrwWallet.quantity -= amount; if (!userWallet.assets['BITHUMB:USDTKRW']) userWallet.assets['BITHUMB:USDTKRW'] = { name: '테더', ticker: 'USDT', quantity: 0 }; userWallet.assets['BITHUMB:USDTKRW'].quantity += receivedUsdt; alert(`${amount.toLocaleString()} KKRW 교환 완료!\n수수료(${(feeRate * 100).toFixed(2)}%): ${fee.toFixed(4)} KKRW\n최종 지급: ${receivedUsdt.toLocaleString()} USDT`); } renderSettingsUI(); return; }
                 const sendBtn = closest('.send-btn'); if(sendBtn) { const assetSymbol = sendBtn.dataset.assetSymbol; const assetData = userWallet.assets[assetSymbol]; mainView.classList.add('hidden'); detailView.classList.remove('hidden'); loadSendUI(assetData, assetSymbol); return; }
                 const fiatSendBtn = closest('.fiat-send-btn'); if(fiatSendBtn) { const assetSymbol = fiatSendBtn.dataset.assetSymbol; const assetData = {name: assetSymbol === 'KRW' ? '대한민국 원' : '일본 엔', ticker: assetSymbol, quantity: userWallet[assetSymbol]}; mainView.classList.add('hidden'); detailView.classList.remove('hidden'); loadFiatSendUI(assetData); return; }
                 const currencyBtn = closest('.currency-btn'); if(currencyBtn) { appState.displayCurrency = currencyBtn.dataset.currency; refreshAllUI(); return; }
@@ -474,6 +550,8 @@
                 const leverageBtn = closest('.leverage-btn'); if(leverageBtn) { appState.leverage = parseInt(leverageBtn.dataset.leverage); const buttons = closest('.grid').querySelectorAll('.leverage-btn'); buttons.forEach(btn => { btn.classList.remove('bg-blue-600', 'text-white'); btn.classList.add('bg-gray-200'); }); leverageBtn.classList.add('bg-blue-600', 'text-white'); leverageBtn.classList.remove('bg-gray-200'); return; }
                 const positionBtn = closest('.position-btn'); if(positionBtn) { appState.position = positionBtn.dataset.position; const buttons = closest('.grid').querySelectorAll('.position-btn'); buttons.forEach(btn => { btn.classList.remove('bg-red-600', 'bg-blue-600', 'text-white'); btn.classList.add('bg-gray-200'); }); positionBtn.classList.add(appState.position === 'long' ? 'bg-red-600' : 'bg-blue-600', 'text-white'); positionBtn.classList.remove('bg-gray-200'); return; }
                 const rwaTypeBtn = closest('.rwa-type-btn'); if (rwaTypeBtn) { appState.rwaTradeType = rwaTypeBtn.dataset.type; const tradeUiWrapper = document.getElementById('trade-ui-wrapper'); const symbol = document.getElementById('detail-symbol').textContent; const currency = mockApi.basePrices[symbol].currency; const currentPrice = mockApi.basePrices[symbol].price; const newTradeUiHtml = getTradeUiHtml(currentPrice, currency, symbol); tradeUiWrapper.outerHTML = newTradeUiHtml; return; }
+                const goToVoteBtn = closest('#go-to-vote-btn'); if(goToVoteBtn){ loadVotingUI(); return; }
+                const voteOptionBtn = closest('.vote-option-btn'); if(voteOptionBtn){ const option = voteOptionBtn.dataset.option; const myVotes = getTotalKaia(); votingStatus[option] += myVotes; appState.hasVoted = true; loadVotingUI(); return; }
             });
             
             appContainer.addEventListener('input', (e) => {
@@ -528,6 +606,7 @@
                     const asset = userWallet.assets[symbol] || Object.values(userWallet.assets).find(a => a.ticker === symbol.split(':')[1].replace('KRW', ''));
                     document.getElementById('estimated-rewards').textContent = `${reward.toFixed(8)} ${asset.ticker}`;
                 }
+                if(target.matches('#swap-input')) { updateSwapUI(); }
             });
 
             updateAllPrices();
