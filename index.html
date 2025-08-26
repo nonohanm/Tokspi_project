@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <title>증권+</title>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .friend-item.selected-kakao { background-color: #FFFBEB; border: 2px dashed #FBBF24; }
+        .friend-item.selected-line { background-color: #F0FFF4; border: 2px dashed #4ADE80; }
+        .rwa-mode-bg { background-color: #F0FDFA; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div id="app-container" class="w-full max-w-sm mx-auto bg-white font-sans shadow-lg relative" style="min-height: 100vh;">
+
+        <div id="main-view">
+            <header class="bg-white p-4 border-b sticky top-0 z-10">
+                <h1 id="header-title" class="text-xl font-bold text-gray-800">증권+</h1>
+            </header>
+
+            <main class="p-4 pb-20">
+                <div id="exchange-content" class="content-section">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">암호화폐</h2>
+                    <ul id="crypto-list">
+                        <li class="asset-item flex justify-between items-center py-3 border-b cursor-pointer" data-type="crypto" data-symbol="BITHUMB:BTCKRW" data-name="비트코인">
+                            <div><p class="font-semibold">비트코인 (BTC)</p><p class="text-sm text-gray-500">거래대금 -</p></div>
+                            <div class="text-right"><p class="font-semibold price">Loading...</p><p class="text-sm change"> </p></div>
+                        </li>
+                        <li class="asset-item flex justify-between items-center py-3 border-b cursor-pointer" data-type="crypto" data-symbol="BITHUMB:ETHKRW" data-name="이더리움">
+                            <div><p class="font-semibold">이더리움 (ETH)</p><p class="text-sm text-gray-500">거래대금 -</p></div>
+                            <div class="text-right"><p class="font-semibold price">Loading...</p><p class="text-sm change"> </p></div>
+                        </li>
+                        <li class="asset-item flex justify-between items-center py-3 border-b cursor-pointer" data-type="crypto" data-symbol="BITHUMB:USDTKRW" data-name="테더">
+                            <div><p class="font-semibold">테더 (USDT)</p><p class="text-sm text-gray-500">거래대금 -</p></div>
+                            <div class="text-right"><p class="font-semibold price">Loading...</p><p class="text-sm change"> </p></div>
+                        </li>
+                        <li class="asset-item flex justify-between items-center py-3 border-b cursor-pointer" data-type="crypto" data-symbol="BITHUMB:KAIAKRW" data-name="카이아">
+                            <div><p class="font-semibold">카이아 (KAIA)</p><p class="text-sm text-gray-500">거래대금 -</p></div>
+                            <div class="text-right"><p class="font-semibold price">Loading...</p><p class="text-sm change"> </p></div>
+                        </li>
+                        <li class="asset-item flex justify-between items-center py-3 border-b cursor-pointer" data-type="crypto" data-symbol="KKRW" data-name="KKRW">
+                            <div><p class="font-semibold">KKRW (KKRW)</p><p class="text-sm text-gray-500">거래대금 -</p></div>
+                            <div class="text-right"><p class="font-semibold price">Loading...</p><p class="text-sm change"></p></div>
+                        </li>
+                    </ul>
+                    <section class="mt-8">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4">주식</h2>
+                         <ul id="stock-list">
+                            <li class="asset-item flex justify-between items-center py-3 border-b cursor-pointer" data-type="stock" data-symbol="035720.KS" data-name="카카오">
+                                <div><p class="font-semibold">카카오 (Kakao)</p><p class="text-sm text-gray-500">거래대금 -</p></div>
+                                <div class="text-right"><p class="font-semibold price">Loading...</p><p class="text-sm change"> </p></div>
+                            </li>
+                            <li class="asset-item flex justify-between items-center py-3 border-b cursor-pointer" data-type="stock" data-symbol="377300.KS" data-name="카카오페이">
+                                <div><p class="font-semibold">카카오페이 (Kakaopay)</p><p class="text-sm text-gray-500">거래대금 -</p></div>
+                                <div class="text-right"><p class="font-semibold price">Loading...</p><p class="text-sm change"> </p></div>
+                            </li>
+                            <li class="asset-item flex justify-between items-center py-3 border-b cursor-pointer" data-type="stock" data-symbol="323410.KS" data-name="카카오뱅크">
+                                <div><p class="font-semibold">카카오뱅크 (Kakaobank)</p><p class="text-sm text-gray-500">거래대금 -</p></div>
+                                <div class="text-right"><p class="font-semibold price">Loading...</p><p class="text-sm change"> </p></div>
+                            </li>
+                            <li class="asset-item flex justify-between items-center py-3 border-b cursor-pointer" data-type="stock" data-symbol="4689.T" data-name="라인 (LY Corporation)">
+                                <div><p class="font-semibold">라인 (LY Corp)</p><p class="text-sm text-gray-500">거래대금 -</p></div>
+                                <div class="text-right"><p class="font-semibold price">Loading...</p><p class="text-sm change"> </p></div>
+                            </li>
+                        </ul>
+                    </section>
+                </div>
+                <div id="search-content" class="content-section hidden"></div>
+                <div id="history-content" class="content-section hidden"></div>
+                <div id="transfer-content" class="content-section hidden"></div>
+                <div id="more-content" class="content-section hidden"></div>
+            </main>
+
+            <footer class="fixed bottom-0 w-full max-w-sm mx-auto bg-white border-t">
+                <div class="flex justify-around items-center h-16">
+                    <div class="nav-item text-center text-blue-600 cursor-pointer" data-tab="exchange" data-title="증권+"><span class="text-2xl">📊</span><p class="text-xs font-semibold">증권+</p></div>
+                    <div class="nav-item text-center text-gray-500 cursor-pointer" data-tab="search" data-title="검색"><span class="text-2xl">🔍</span><p class="text-xs">검색</p></div>
+                    <div class="nav-item text-center text-gray-500 cursor-pointer" data-tab="history" data-title="투자내역"><span class="text-2xl">💰</span><p class="text-xs">투자내역</p></div>
+                    <div class="nav-item text-center text-gray-500 cursor-pointer" data-tab="transfer" data-title="자산"><span class="text-2xl">💼</span><p class="text-xs">자산</p></div>
+                    <div class="nav-item text-center text-gray-500 cursor-pointer" data-tab="more" data-title="더보기"><span class="text-2xl">☰</span><p class="text-xs">더보기</p></div>
+                </div>
+            </footer>
+        </div>
+
+        <div id="detail-view" class="hidden">
+            <header class="bg-white p-4 border-b flex items-center sticky top-0 z-10">
+                <button id="back-button" class="text-2xl mr-4 font-bold">‹</button>
+                <div><h1 id="detail-name" class="text-xl font-bold text-gray-800"></h1><p id="detail-symbol" class="text-sm text-gray-500"></p></div>
+            </header>
+            <div id="detail-content-container" class="w-full flex-grow flex flex-col"></div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script>
+        // 데이터
+        const FEE_RATES = { CRYPTO: 0.0005, RWA: 0.0005, STOCK: 0.0015 };
+        const KAIA_BENEFIT_THRESHOLD = 500;
+        const appState = { displayCurrency: 'Default', linkedAccounts: { kakao: false, line: false }, tradeMode: 'standard', rwaTradeType: 'spot', leverage: 1, position: 'long' };
+        const exchangeRates = { KRW: 1, JPY: 8.5, KKRW: 1000, USDT: 1384.41 };
+        const userWallet = { 
+            KRW: 1000000, 
+            JPY: 5000, 
+            assets: { 
+                'BITHUMB:USDTKRW': { name: '테더', ticker: 'USDT', quantity: 1000 },
+                'BITHUMB:ETHKRW': { name: '이더리움', ticker: 'ETH', quantity: 10 },
+                'BITHUMB:KAIAKRW': { name: '카이아', ticker: 'KAIA', quantity: 650 }, 
+                'KKRW': { name: 'KKRW', ticker: 'KKRW', quantity: 1800 }, 
+                '035720.KS': { name: '카카오', ticker: 'KAKAO', quantity: 10 }, 
+                '4689.T': { name: '라인', ticker: 'LINE', quantity: 20 } 
+            },
+            stakedAssets: [] 
+        };
+        const mockApi = { basePrices: { 
+            "BITHUMB:BTCKRW": { name: '비트코인', type: 'crypto', price: 9437280.96, currency: 'KRW', apy: 3.0 }, 
+            "BITHUMB:ETHKRW": { name: '이더리움', type: 'crypto', price: 5909558.76, currency: 'KRW', apy: 4.5 }, 
+            "BITHUMB:USDTKRW": { name: '테더', type: 'crypto', price: 1384.41, currency: 'KRW', apy: 6.0 },
+            "BITHUMB:KAIAKRW": { name: '카이아', type: 'crypto', price: 208.25, currency: 'KRW', apy: 7.5 }, 
+            "KKRW": { name: 'KKRW', type: 'crypto', price: 1000, currency: 'KRW', apy: 0 }, 
+            "035720.KS": { name: '카카오', type: 'stock', price: 43500, currency: 'KRW' },
+            "377300.KS": { name: '카카오페이', type: 'stock', price: 62100, currency: 'KRW' },
+            "323410.KS": { name: '카카오뱅크', type: 'stock', price: 25200, currency: 'KRW' },
+            "4689.T": { name: '라인 (LY Corporation)', type: 'stock', price: 385, currency: 'JPY' }, 
+            '005930.KS': { name: '삼성전자', type: 'stock', price: 71600, currency: 'KRW' },
+            '000660.KS': { name: 'SK하이닉스', type: 'stock', price: 276500, currency: 'KRW' },
+            '373220.KS': { name: 'LG에너지솔루션', type: 'stock', price: 394000, currency: 'KRW' },
+            '207940.KS': { name: '삼성바이오로직스', type: 'stock', price: 1033000, currency: 'KRW' },
+            '005935.KS': { name: '삼성전자우', type: 'stock', price: 58200, currency: 'KRW' },
+            '012450.KS': { name: '한화에어로스페이스', type: 'stock', price: 883000, currency: 'KRW' },
+            '005380.KS': { name: '현대차', type: 'stock', price: 217500, currency: 'KRW' },
+            '105560.KS': { name: 'KB금융', type: 'stock', price: 113200, currency: 'KRW' },
+            '329180.KS': { name: 'HD현대중공업', type: 'stock', price: 477000, currency: 'KRW' },
+            '034020.KS': { name: '두산에너빌리티', type: 'stock', price: 65500, currency: 'KRW' }
+        }, fetchRealTimeData: async function(symbols) { await new Promise(resolve => setTimeout(resolve, 300)); const results = {}; symbols.forEach(symbol => { if (this.basePrices[symbol]) { const baseInfo = this.basePrices[symbol]; let currentPrice = baseInfo.price; let changePercent = 0; if (symbol !== 'KKRW') { const fluctuation = baseInfo.price * 0.03; const change = (Math.random() - 0.5) * fluctuation; currentPrice = baseInfo.price + change; changePercent = (change / baseInfo.price) * 100; } results[symbol] = { price: currentPrice, changePercent: changePercent, currency: baseInfo.currency }; } }); return results; } };
+        const Hangul = { CHO: ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"], JUNG: ["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"], JONG: ["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"], disassemble: function(text) { let result = ""; for (let i = 0; i < text.length; i++) { const charCode = text.charCodeAt(i); if (charCode >= 44032 && charCode <= 55203) { const jong = charCode - 44032; const cho = Math.floor(jong / 588); const jung = Math.floor((jong - cho * 588) / 28); result += this.CHO[cho] + this.JUNG[jung]; if (jong % 28 > 0) result += this.JONG[jong % 28]; } else { result += text[i]; } } return result; }, includes: function(base, search) { if (!search) return true; return this.disassemble(base).includes(this.disassemble(search)); } };
+        const mockFriends = [ { name: '김민준', platform: 'kakao' }, { name: '이서연', platform: 'line' }, { name: '박도윤', platform: 'kakao' }, { name: '최지우', platform: 'line' } ];
+        
+        const mainView = document.getElementById('main-view'), detailView = document.getElementById('detail-view'), detailContentContainer = document.getElementById('detail-content-container');
+
+        google.charts.load('current', {'packages':['corechart']});
+
+        // 계산기
+        function isKaiaBenefitActive() {
+            return userWallet.stakedAssets.some(asset => 
+                asset.symbol === 'BITHUMB:KAIAKRW' &&
+                asset.duration === 14 &&
+                asset.quantity >= KAIA_BENEFIT_THRESHOLD
+            );
+        }
+        function convertToDisplayCurrency(value, fromCurrency) { if (appState.displayCurrency === 'Default') { return { value: value, currency: 'KRW' }; } const valueInKRW = value * (exchangeRates[fromCurrency] || 1); const displayRate = exchangeRates[appState.displayCurrency] || 1; const convertedValue = valueInKRW / displayRate; return { value: convertedValue, currency: appState.displayCurrency }; }
+        async function updateAllPrices() { const assetElements = document.querySelectorAll('.asset-item'); const symbols = Array.from(assetElements).map(el => el.dataset.symbol); const liveData = await mockApi.fetchRealTimeData(symbols); assetElements.forEach(el => { const symbol = el.dataset.symbol; if (liveData[symbol]) { const data = liveData[symbol]; el.dataset.currency = data.currency; const displayData = convertToDisplayCurrency(data.price, data.currency); const priceEl = el.querySelector('.price'); const changeEl = el.querySelector('.change'); priceEl.textContent = `${displayData.value.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${displayData.currency}`; changeEl.textContent = `${data.changePercent.toFixed(2)}%`; priceEl.classList.toggle('text-red-600', data.changePercent > 0); priceEl.classList.toggle('text-blue-600', data.changePercent < 0); changeEl.classList.toggle('text-red-600', data.changePercent > 0); changeEl.classList.toggle('text-blue-600', data.changePercent < 0); } }); }
+        
+        // 화면 렌더링 함수들 
+        function renderSearchUI() { const container = document.getElementById('search-content'); container.innerHTML = `<div class="relative"><input type="text" id="search-input" placeholder="종목명 검색" class="w-full p-3 pl-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span></div><ul id="search-results-list" class="mt-4"></ul>`; const allStocks = Object.entries(mockApi.basePrices).filter(([, data]) => data.type === 'stock').map(([symbol, data]) => ({...data, symbol})); displaySearchResults(allStocks); }
+        function displaySearchResults(assets) { const listContainer = document.getElementById('search-results-list'); if (assets.length === 0) { listContainer.innerHTML = '<li class="text-center text-gray-500 py-4">검색 결과가 없습니다.</li>'; return; } listContainer.innerHTML = assets.map(asset => `<li class="asset-item flex justify-between items-center py-3 border-b cursor-pointer" data-type="stock" data-symbol="${asset.symbol}" data-name="${asset.name}" data-currency="${asset.currency}"><div ><p class="font-semibold">${asset.name}</p><p class="text-sm text-gray-500">${asset.symbol}</p></div><div class="text-right font-semibold price">${asset.price.toLocaleString()} ${asset.currency}</div></li>`).join(''); }
+        function renderHistoryUI() { const container = document.getElementById('history-content'); container.innerHTML = `<div class="mb-6"><h2 class="text-lg font-bold text-gray-800 mb-2">포트폴리오 성과</h2><div id="performance-chart" class="w-full h-48 bg-gray-50 rounded-lg"></div></div><div class="mb-6"><h2 class="text-lg font-bold text-gray-800 mb-2">자산 배분</h2><div id="allocation-chart" class="w-full h-64 bg-gray-50 rounded-lg"></div></div><div><h2 class="text-lg font-bold text-gray-800 mb-2">요약</h2><div class="space-y-3"><div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg"><p class="font-semibold">이번년도 수익률</p><p class="font-bold text-red-600">+15.72%</p></div><div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg"><p class="font-semibold">이번년도 배당금</p><p class="font-bold text-blue-600">35,000 KRW</p></div><div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg"><p class="font-semibold">총 수익률</p><p class="font-bold text-red-600">+23.40%</p></div></div></div>`; google.charts.setOnLoadCallback(drawPerformanceChart); google.charts.setOnLoadCallback(drawAllocationChart); }
+        function renderAssetsUI() {
+            const container = document.getElementById('transfer-content');
+            const fiatHtml = Object.keys(userWallet).filter(k => k !== 'assets' && k !== 'stakedAssets').map(key => {
+                const asset = { name: key === 'KRW' ? '대한민국 원' : '일본 엔', ticker: key, quantity: userWallet[key] };
+                return `<li class="flex justify-between items-center py-4 border-b"><div><p class="font-semibold">${asset.name} (${asset.ticker})</p><p class="text-sm text-gray-600">보유액: ${asset.quantity.toLocaleString()}</p></div><button class="fiat-send-btn bg-blue-500 text-white px-4 py-2 rounded text-sm font-bold hover:bg-blue-600" data-asset-symbol="${asset.ticker}">입금/송금</button></li>`
+            }).join('');
+
+            const cryptoHtml = Object.keys(userWallet.assets).filter(symbol => mockApi.basePrices[symbol]?.type === 'crypto' || userWallet.assets[symbol].rwaOriginalSymbol).map(symbol => {
+                const asset = userWallet.assets[symbol];
+                let quantityText = `보유수량: ${asset.quantity.toLocaleString()}`;
+
+                if (asset.rwaOriginalSymbol) {
+                    const originalAssetInfo = mockApi.basePrices[asset.rwaOriginalSymbol];
+                    const valueInKRW = asset.quantity * originalAssetInfo.price * (exchangeRates[originalAssetInfo.currency] || 1);
+                    const displayData = convertToDisplayCurrency(valueInKRW, 'KRW');
+                    quantityText += ` (${displayData.value.toLocaleString()} ${displayData.currency})`;
+                } else if (asset.ticker === 'KKRW') {
+                    const valueInKRW = asset.quantity * 1000;
+                    const displayData = convertToDisplayCurrency(valueInKRW, 'KRW');
+                    quantityText += ` (${displayData.value.toLocaleString()} ${displayData.currency})`;
+                }
+
+                const isStakeable = mockApi.basePrices[symbol]?.type === 'crypto' && !asset.rwaOriginalSymbol && symbol !== 'KKRW';
+                let buttonsHtml = `<button class="send-btn bg-blue-500 text-white px-3 py-2 rounded text-sm font-bold hover:bg-blue-600" data-asset-symbol="${symbol}">입금/송금</button>`;
+                if (isStakeable) {
+                    buttonsHtml += `<button class="stake-btn bg-purple-500 text-white px-3 py-2 rounded text-sm font-bold hover:bg-purple-600" data-asset-symbol="${symbol}">스테이킹</button>`;
+                }
+
+                return `<li class="flex justify-between items-center py-4 border-b">
+                            <div>
+                                <p class="font-semibold">${asset.name} (${asset.ticker})</p>
+                                <p class="text-sm text-gray-600">${quantityText}</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                ${buttonsHtml}
+                            </div>
+                        </li>`;
+            }).join('');
+
+            const stockHtml = Object.keys(userWallet.assets).filter(symbol => mockApi.basePrices[symbol]?.type === 'stock' && !userWallet.assets[symbol].rwaOriginalSymbol).map(symbol => {
+                const asset = userWallet.assets[symbol];
+                return `<li class="flex justify-between items-center py-4 border-b"><div><p class="font-semibold">${asset.name} (${asset.ticker})</p><p class="text-sm text-gray-600">보유수량: ${asset.quantity.toLocaleString()}</p></div></li>`;
+            }).join('');
+
+            container.innerHTML = `<h2 class="text-lg font-bold text-gray-800 mb-2">보유 현금</h2><ul>${fiatHtml}</ul><h2 class="text-lg font-bold text-gray-800 mt-8 mb-2">암호화폐</h2><ul>${cryptoHtml}</ul><h2 class="text-lg font-bold text-gray-800 mt-8 mb-2">보유 주식</h2><ul>${stockHtml}</ul>`;
+        }
+        function renderSettingsUI() {
+            const container = document.getElementById('more-content');
+            const currencies = ['Default', 'KRW', 'JPY', 'KKRW', 'USDT'];
+            const currencyButtonsHtml = currencies.map(currency => { const isSelected = appState.displayCurrency === currency; const currencyText = currency === 'Default' ? '기본' : currency; return `<button class="currency-btn w-full p-3 text-left rounded-md ${isSelected ? 'bg-blue-500 text-white' : 'bg-gray-200'}" data-currency="${currency}">${currencyText}</button>` }).join('');
+            
+            const kaiaBenefitActive = isKaiaBenefitActive();
+            const kaiaBenefitHtml = kaiaBenefitActive ? `<p class="text-sm text-green-600 font-bold mb-2">✨ 카이아 14일 스테이킹 혜택 적용 중</p>` : '';
+
+            const stakedAssetsHtml = userWallet.stakedAssets.length === 0 
+                ? '<p class="text-sm text-gray-500">스테이킹 중인 자산이 없습니다.</p>' 
+                : userWallet.stakedAssets.map((asset, index) => {
+                    const assetInfo = mockApi.basePrices[asset.symbol];
+                    const timePassed = (Date.now() - asset.startDate) / (1000 * 60 * 60 * 24);
+                    const daysRemaining = Math.max(0, asset.duration - timePassed);
+                    return `<li class="flex justify-between items-center py-3 border-b">
+                                <div>
+                                    <p class="font-semibold">${assetInfo.name} (${asset.quantity.toLocaleString()} 개)</p>
+                                    <p class="text-sm text-gray-500">${asset.duration}일 (${daysRemaining.toFixed(1)}일 남음)</p>
+                                </div>
+                                <button class="unstake-btn bg-red-500 text-white px-3 py-2 rounded text-sm font-bold" data-stake-index="${index}">해지</button>
+                            </li>`;
+                }).join('');
+
+            const kakaoLinked = appState.linkedAccounts.kakao;
+            const lineLinked = appState.linkedAccounts.line;
+
+            const rwaAssets = Object.keys(userWallet.assets).filter(symbol => userWallet.assets[symbol].rwaOriginalSymbol && userWallet.assets[symbol].isSpot).map(symbol => ({...userWallet.assets[symbol], rwaSymbol: symbol }));
+            const rwaHtml = rwaAssets.length === 0 ? '<p class="text-sm text-gray-500">교환 가능한 RWA 현물 토큰이 없습니다.</p>' : rwaAssets.map(asset => `<li class="flex justify-between items-center py-3 border-b" data-rwa-symbol="${asset.rwaSymbol}"><div><p class="font-semibold">${asset.name}</p><p class="text-sm text-gray-500">보유수량: ${asset.quantity.toLocaleString()}</p></div><button class="swap-rwa-btn bg-green-500 text-white px-4 py-2 rounded text-sm font-bold">교환하기</button></li>`).join('');
+
+            container.innerHTML = `<h2 class="text-lg font-bold text-gray-800 mb-4">스테이킹 현황</h2>${kaiaBenefitHtml}<ul id="staked-assets-list">${stakedAssetsHtml}</ul><hr class="my-6"><h2 class="text-lg font-bold text-gray-800 mb-4">통화 설정</h2><div class="space-y-2 mb-8">${currencyButtonsHtml}</div><h2 class="text-lg font-bold text-gray-800 mb-4">계정 연동</h2><p class="text-sm text-gray-500 -mt-2 mb-4">연동하면 친구들에게 간편하게 송금이 가능해요!</p><div class="space-y-2 mb-8"><div class="flex justify-between items-center p-3 rounded-md ${kakaoLinked ? 'bg-yellow-100' : 'bg-gray-100'}"><p class="font-semibold">카카오 계정</p><button class="link-account-btn px-4 py-2 text-sm font-bold rounded ${kakaoLinked ? 'bg-gray-400 text-white' : 'bg-yellow-400'}" data-platform="kakao">${kakaoLinked ? '연동됨' : '연동하기'}</button></div><div class="flex justify-between items-center p-3 rounded-md ${lineLinked ? 'bg-green-100' : 'bg-gray-100'}"><p class="font-semibold">라인 계정</p><button class="link-account-btn px-4 py-2 text-sm font-bold rounded ${lineLinked ? 'bg-gray-400 text-white' : 'bg-green-500 text-white'}" data-platform="line">${lineLinked ? '연동됨' : '연동하기'}</button></div></div><h2 class="text-lg font-bold text-gray-800 mb-4">RWA 토큰 교환 (현물)</h2><ul id="rwa-swap-list">${rwaHtml}</ul>`; 
+        }
+
+        // 거래
+        function refreshAllUI() { const currentTab = document.querySelector('.nav-item.text-blue-600')?.dataset.tab; if (tabRenderFunctions[currentTab]) tabRenderFunctions[currentTab](); updateAllPrices(); }
+        function loadCryptoUI(symbol, currentPrice, currency) { const tradeUiHtml = getTradeUiHtml(currentPrice, currency, symbol); detailContentContainer.innerHTML = `<div id="chart-container" class="w-full" style="height: 400px;"></div> ${tradeUiHtml}`; if (symbol === 'KKRW') { document.getElementById('chart-container').innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">1,000원 고정 스테이블 코인입니다.</div>`; } else { new TradingView.widget({ "autosize": true, "symbol": symbol, "interval": "60", "timezone": "Asia/Seoul", "theme": "light", "style": "1", "locale": "kr", "container_id": "chart-container" }); } }
+        function loadStockUI(symbol, currentPrice, currency) { appState.tradeMode = 'standard'; appState.rwaTradeType = 'spot'; appState.leverage = 1; appState.position = 'long'; const tradeModeSwitcherHtml = `<div class="p-4 bg-gray-100"><div id="trade-mode-toggle" class="relative w-full h-10 bg-gray-300 rounded-lg flex items-center cursor-pointer"><div id="trade-mode-slider" class="absolute h-full w-1/2 bg-white rounded-lg shadow-md transition-transform transform left-0"></div><div class="w-1/2 text-center z-10 font-bold text-blue-600">기본 거래</div><div class="w-1/2 text-center z-10 font-semibold text-gray-600">RWA 체인 거래</div></div></div>`; const tradeUiHtml = getTradeUiHtml(currentPrice, currency, symbol); detailContentContainer.innerHTML = `${tradeModeSwitcherHtml}<div id="chart-container" class="w-full" style="height: 400px;"></div> ${tradeUiHtml}`; google.charts.setOnLoadCallback(() => drawCandlestickChart(symbol)); }
+        function getTradeUiHtml(currentPrice, originalCurrency, symbol) {
+            const rwaSubTradeUi = (appState.tradeMode === 'rwa') ? `<div class="space-y-2 mb-2"><label class="font-semibold text-sm">거래 종류</label><div class="grid grid-cols-2 gap-1"><button class="rwa-type-btn p-2 rounded text-sm ${appState.rwaTradeType === 'spot' ? 'bg-blue-600 text-white' : 'bg-gray-200'}" data-type="spot">현물</button><button class="rwa-type-btn p-2 rounded text-sm ${appState.rwaTradeType === 'futures' ? 'bg-blue-600 text-white' : 'bg-gray-200'}" data-type="futures">선물</button></div></div><div id="leverage-ui-container" class="${appState.rwaTradeType === 'futures' ? '' : 'hidden'}"><div class="space-y-2 mb-2"><label class="font-semibold text-sm">레버리지</label><div class="grid grid-cols-3 gap-1"><button class="leverage-btn p-2 rounded text-sm ${appState.leverage === 1 ? 'bg-blue-600 text-white' : 'bg-gray-200'}" data-leverage="1">1x</button><button class="leverage-btn p-2 rounded text-sm ${appState.leverage === 2 ? 'bg-blue-600 text-white' : 'bg-gray-200'}" data-leverage="2">2x</button><button class="leverage-btn p-2 rounded text-sm ${appState.leverage === 3 ? 'bg-blue-600 text-white' : 'bg-gray-200'}" data-leverage="3">3x</button></div></div><div><label class="font-semibold text-sm">포지션</label><div class="grid grid-cols-2 gap-1"><button class="position-btn p-2 rounded text-sm ${appState.position === 'long' ? 'bg-red-600 text-white' : 'bg-gray-200'}" data-position="long">LONG</button><button class="position-btn p-2 rounded text-sm ${appState.position === 'short' ? 'bg-blue-600 text-white' : 'bg-gray-200'}" data-position="short">SHORT</button></div></div></div>` : '';
+            let displayInfo, walletCurrency, availableBalance;
+
+            if (appState.tradeMode === 'rwa') {
+                const priceInKRW = currentPrice * (exchangeRates[originalCurrency] || 1);
+                const priceInKKRW = priceInKRW / exchangeRates.KKRW;
+                walletCurrency = 'KKRW';
+                availableBalance = userWallet.assets['KKRW']?.quantity || 0;
+                displayInfo = { currency: 'KKRW', price: priceInKKRW, wallet: availableBalance };
+            } else {
+                const assetType = detailView.dataset.assetType;
+                const displayCurrency = (appState.displayCurrency === 'Default') ? 'KRW' : appState.displayCurrency;
+                if (assetType === 'crypto') { walletCurrency = displayCurrency; availableBalance = userWallet[walletCurrency] || 0; } else { walletCurrency = originalCurrency; availableBalance = userWallet[walletCurrency] || 0; }
+                displayInfo = { currency: displayCurrency, price: convertToDisplayCurrency(currentPrice, originalCurrency).value, wallet: availableBalance };
+            }
+
+            let asksHtml = '', bidsHtml = '';
+            for (let i = 3; i > 0; i--) {
+                const askOriginalPrice = currentPrice * (1 + 0.001 * i);
+                const bidOriginalPrice = currentPrice * (1 - 0.001 * i);
+                let askDisplayValue, bidDisplayValue, secondaryAskHtml = '', secondaryBidHtml = '';
+
+                if (appState.tradeMode === 'rwa') {
+                    askDisplayValue = (askOriginalPrice * (exchangeRates[originalCurrency] || 1)) / exchangeRates.KKRW;
+                    bidDisplayValue = (bidOriginalPrice * (exchangeRates[originalCurrency] || 1)) / exchangeRates.KKRW;
+                    if (appState.displayCurrency !== 'KKRW') {
+                        const convertedAsk = convertToDisplayCurrency(askDisplayValue * exchangeRates.KKRW, 'KRW');
+                        secondaryAskHtml = `<span class="text-gray-400 font-normal text-xs">(${convertedAsk.value.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${convertedAsk.currency})</span>`;
+                        const convertedBid = convertToDisplayCurrency(bidDisplayValue * exchangeRates.KKRW, 'KRW');
+                        secondaryBidHtml = `<span class="text-gray-400 font-normal text-xs">(${convertedBid.value.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${convertedBid.currency})</span>`;
+                    }
+                } else {
+                    askDisplayValue = convertToDisplayCurrency(askOriginalPrice, originalCurrency).value;
+                    bidDisplayValue = convertToDisplayCurrency(bidOriginalPrice, originalCurrency).value;
+                }
+
+                asksHtml += `<div class="flex items-center text-sm text-blue-600 border-b h-10"><div class="w-1/2 text-center leading-tight">${askDisplayValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}<br>${secondaryAskHtml}</div><div class="w-1/2 text-right pr-2">${(Math.random() * 5).toFixed(2)}</div></div>`;
+                bidsHtml += `<div class="flex items-center text-sm text-red-600 border-b h-10"><div class="w-1/2 text-center leading-tight">${bidDisplayValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}<br>${secondaryBidHtml}</div><div class="w-1/2 text-right pr-2">${(Math.random() * 5).toFixed(2)}</div></div>`;
+            }
+
+            let secondaryPriceHtml = '';
+            if (appState.tradeMode === 'rwa' && appState.displayCurrency !== 'KKRW') {
+                const priceInKRW = displayInfo.price * exchangeRates.KKRW;
+                const converted = convertToDisplayCurrency(priceInKRW, 'KRW');
+                secondaryPriceHtml = `<span class="text-base text-gray-500 font-normal ml-2">(${converted.value.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${converted.currency})</span>`;
+            }
+
+            return `<div id="trade-ui-wrapper" class="${appState.tradeMode === 'rwa' ? 'rwa-mode-bg' : ''}">
+                        <div class="flex-grow p-2 flex">
+                            <div class="w-1/2 pr-1 no-scrollbar overflow-y-auto">
+                                ${asksHtml}
+                                <div class="h-12 flex items-center justify-center font-bold text-lg text-red-600 border-y-2 border-red-500 my-1">
+                                    ${displayInfo.price.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${secondaryPriceHtml}
+                                </div>
+                                ${bidsHtml}
+                            </div>
+                            <div class="w-1/2 pl-1">
+                                <div class="grid grid-cols-2 gap-1 mb-2">
+                                    <button id="buy-toggle" class="p-2 text-white font-bold bg-red-600 rounded">매수</button>
+                                    <button id="sell-toggle" class="p-2 text-gray-700 font-bold bg-gray-200 rounded">매도</button>
+                                </div>
+                                <div class="space-y-2 text-sm">
+                                    ${rwaSubTradeUi}
+                                    <div><label id="available-label" class="font-semibold">주문가능</label><p id="available-balance" class="text-right">${displayInfo.wallet?.toLocaleString(undefined, { maximumFractionDigits: 2 }) || 0} ${walletCurrency}</p></div>
+                                    <div><label class="font-semibold">가격(${displayInfo.currency})</label><input id="price-input" type="number" class="w-full p-2 border rounded text-right" value="${displayInfo.price.toFixed(2)}"></div>
+                                    <div><label class="font-semibold">수량</label><input id="quantity-input" type="number" class="w-full p-2 border rounded text-right" placeholder="주문 수량"></div>
+                                    <hr>
+                                    <div>
+                                        <label class="font-semibold">주문총액</label>
+                                        <p id="total-amount" class="text-right font-bold">
+                                            <span id="primary-total">0 ${displayInfo.currency}</span>
+                                            <span id="secondary-total" class="text-gray-500 font-normal block text-sm"></span>
+                                        </p>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs">
+                                        <label class="text-gray-500">예상 수수료</label>
+                                        <p id="trade-fee" class="text-right text-gray-500"></p>
+                                    </div>
+                                    <button id="order-button" class="w-full p-3 text-white font-bold bg-red-600 rounded mt-2">매수</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+        }
+        function loadSendUI(asset, assetSymbol) { document.getElementById('detail-name').textContent = `송금하기: ${asset.name}`; document.getElementById('detail-symbol').textContent = ``; const friendsHtml = mockFriends.map(friend => `<div class="friend-item p-3 border rounded-md cursor-pointer" data-platform="${friend.platform}"><p class="font-semibold">${friend.name}</p><p class="text-sm">${friend.platform === 'kakao' ? '카카오 친구' : '라인 친구'}</p></div>`).join(''); detailContentContainer.innerHTML = `<div class="p-4 flex flex-col h-full"><div><h2 class="text-lg font-bold text-gray-800 mb-2">보낼 수량 입력</h2><input type="number" id="send-amount-input" placeholder="수량을 입력하세요" class="w-full p-3 border rounded-md mb-2"><p class="text-sm text-gray-600 text-right mb-6">보유수량: ${asset.quantity.toLocaleString()} ${asset.ticker}</p><h2 class="text-lg font-bold text-gray-800 mb-2">지갑 주소로 보내기</h2><input type="text" placeholder="받는 사람의 지갑 주소" class="w-full p-3 border rounded-md mb-6"><h2 class="text-lg font-bold text-gray-800 mb-2">친구에게 보내기</h2><div class="grid grid-cols-2 gap-2 mb-6">${friendsHtml}</div></div><div class="mt-auto"><button id="send-confirm-btn" data-asset-symbol="${assetSymbol}" class="w-full p-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">송금 완료하기</button></div></div>`; }
+        function loadFiatSendUI(asset) { document.getElementById('detail-name').textContent = `송금하기: ${asset.name}`; document.getElementById('detail-symbol').textContent = ``; const friendsHtml = mockFriends.map(friend => `<div class="friend-item p-3 border rounded-md cursor-pointer" data-platform="${friend.platform}"><p class="font-semibold">${friend.name}</p><p class="text-sm">${friend.platform === 'kakao' ? '카카오 친구' : '라인 친구'}</p></div>`).join(''); detailContentContainer.innerHTML = `<div class="p-4 flex flex-col h-full"><div><h2 class="text-lg font-bold text-gray-800 mb-2">보낼 금액 입력</h2><input type="number" id="send-amount-input" placeholder="금액을 입력하세요" class="w-full p-3 border rounded-md mb-2"><p class="text-sm text-gray-600 text-right mb-6">보유금액: ${asset.quantity.toLocaleString()} ${asset.ticker}</p><h2 class="text-lg font-bold text-gray-800 mb-2">계좌번호로 보내기</h2><input type="text" placeholder="받는 사람의 계좌번호" class="w-full p-3 border rounded-md mb-6"><h2 class="text-lg font-bold text-gray-800 mb-2">친구에게 보내기</h2><div class="grid grid-cols-2 gap-2 mb-6">${friendsHtml}</div></div><div class="mt-auto"><button id="send-confirm-btn" data-asset-symbol="${asset.ticker}" class="w-full p-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">송금 완료하기</button></div></div>`; }
+        function loadStakingUI(symbol) {
+            const assetInfo = mockApi.basePrices[symbol];
+            const availableAsset = userWallet.assets[symbol];
+            const availableQuantity = availableAsset ? availableAsset.quantity : 0;
+            
+            document.getElementById('detail-name').textContent = `스테이킹: ${assetInfo.name}`;
+            document.getElementById('detail-symbol').textContent = symbol;
+            mainView.classList.add('hidden');
+            detailView.classList.remove('hidden');
+
+            const baseApy = assetInfo.apy;
+            const boostedApy = baseApy + 0.2;
+
+            let kaiaBonusHtml = '';
+            let kaiaBonusClasses = '';
+            if (symbol === 'BITHUMB:KAIAKRW') {
+                kaiaBonusClasses = 'border-dashed border-2 border-amber-500';
+                kaiaBonusHtml = `<div class="mt-2 p-2 bg-amber-100 text-amber-800 text-xs rounded-md text-center">✨ KAIA 500개 이상 14일 스테이킹하면 <strong>특별 혜택</strong>이 제공됩니다!</div>`;
+            }
+
+            const contentHtml = `
+                <div class="p-4 space-y-6">
+                    <div>
+                        <label class="font-semibold text-gray-700">수량 입력</label>
+                        <div class="flex items-center mt-1">
+                            <input type="number" id="stake-quantity-input" placeholder="스테이킹할 수량" class="w-full p-3 border rounded-l-md">
+                            <button id="stake-max-btn" class="bg-gray-200 px-4 py-3 rounded-r-md font-semibold text-sm">최대</button>
+                        </div>
+                        <p class="text-sm text-gray-600 text-right mt-1">사용 가능: ${availableQuantity.toLocaleString()} ${availableAsset.ticker}</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-700">기간 선택</p>
+                        <div class="mt-2 grid grid-cols-2 gap-2" id="stake-duration-options">
+                            <button class="stake-duration-btn border-2 border-blue-500 bg-blue-100 text-blue-700 p-3 rounded-md font-bold text-center" data-duration="7" data-apy="${baseApy}">
+                                7일<br><span class="text-xs font-normal">연 ${baseApy.toFixed(1)}%</span>
+                            </button>
+                            <button class="stake-duration-btn border p-3 rounded-md text-center font-bold ${kaiaBonusClasses}" data-duration="14" data-apy="${boostedApy}">
+                                14일<br><span class="text-xs font-normal">연 ${boostedApy.toFixed(1)}%</span>
+                            </button>
+                        </div>
+                        ${kaiaBonusHtml}
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="font-semibold text-gray-800">예상 보상</p>
+                        <p id="estimated-rewards" class="text-right font-bold text-lg text-purple-600">0 ${availableAsset.ticker}</p>
+                    </div>
+                    <button id="confirm-stake-btn" data-symbol="${symbol}" class="w-full p-4 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700">
+                        스테이킹 확정하기
+                    </button>
+                </div>`;
+            detailContentContainer.innerHTML = contentHtml;
+            document.getElementById('stake-quantity-input').dispatchEvent(new Event('input'));
+        }
+        function drawCandlestickChart(symbol) { const data = google.visualization.arrayToDataTable(mockCandleData(symbol), true); const options = { legend: 'none', candlestick: { fallingColor: { strokeWidth: 0, fill: '#00F' }, risingColor: { strokeWidth: 0, fill: '#F00' }}, hAxis: { textPosition: 'none' }, vAxis: { gridlines: { color: '#f0f0f0' } } }; const chart = new google.visualization.CandlestickChart(document.getElementById('chart-container')); chart.draw(data, options); }
+        function mockCandleData(symbol) { const data = []; let lastClose = mockApi.basePrices[symbol]?.price || 50000; for (let i = 0; i < 60; i++) { const date = new Date(); date.setDate(date.getDate() - (60 - i)); const f = lastClose * 0.05, o = lastClose + (Math.random() - 0.5) * f, c = o + (Math.random() - 0.5) * f, h = Math.max(o, c) + Math.random() * (f*0.5), l = Math.min(o, c) - Math.random() * (f*0.5); data.push([date, l, o, c, h]); lastClose = c; } return data; }
+        function drawPerformanceChart() { const data = google.visualization.arrayToDataTable([ ['월', '가치'], ['1월', 1000], ['2월', 1170], ['3월', 1260], ['4월', 1330], ['5월', 1400], ['6월', 1530], ['7월', 1600], ['8월', 1720] ]); const options = { title: '포트폴리오 가치 추이 (KRW)', curveType: 'function', legend: { position: 'bottom' }, hAxis: { textPosition: 'none' }, vAxis: { format: 'short' } }; const chart = new google.visualization.LineChart(document.getElementById('performance-chart')); chart.draw(data, options); }
+        function drawAllocationChart() { const portfolioData = [['자산', '가치 (KRW)']]; portfolioData.push(['KRW', userWallet.KRW]); portfolioData.push(['JPY', userWallet.JPY * exchangeRates.JPY]); for (const symbol in userWallet.assets) { const asset = userWallet.assets[symbol]; const baseInfo = mockApi.basePrices[asset.rwaOriginalSymbol || symbol]; if (baseInfo) { const valueInKRW = asset.quantity * baseInfo.price * (exchangeRates[baseInfo.currency] || 1); portfolioData.push([asset.ticker, valueInKRW]); } } const options = { title: '자산 배분 (KRW 기준)', pieHole: 0.4 }; const chart = new google.visualization.PieChart(document.getElementById('allocation-chart')); chart.draw(google.visualization.arrayToDataTable(portfolioData), options); }
+
+        const tabRenderFunctions = { search: renderSearchUI, history: renderHistoryUI, transfer: renderAssetsUI, more: renderSettingsUI };
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const appContainer = document.getElementById('app-container');
+            appContainer.addEventListener('click', (e) => {
+                const target = e.target;
+                const closest = (selector) => target.closest(selector);
+
+                if (closest('#back-button')) { detailView.classList.add('hidden'); mainView.classList.remove('hidden'); detailContentContainer.innerHTML = ''; document.querySelector('.nav-item.text-blue-600').click(); return; }
+                const navItem = closest('.nav-item'); if (navItem) { const tabId = navItem.dataset.tab; document.getElementById('header-title').textContent = navItem.dataset.title; document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden')); document.getElementById(tabId + '-content').classList.remove('hidden'); if (tabRenderFunctions[tabId]) tabRenderFunctions[tabId](); document.querySelectorAll('.nav-item').forEach(n => { n.classList.remove('text-blue-600'); n.classList.add('text-gray-500'); n.querySelector('p').classList.remove('font-semibold'); }); navItem.classList.add('text-blue-600'); navItem.querySelector('p').classList.add('font-semibold'); return; }
+                const assetItem = closest('.asset-item'); if (assetItem) { const { type, symbol, name } = assetItem.dataset; let currency = assetItem.dataset.currency; const basePrice = mockApi.basePrices[symbol]?.price || 0; const originalCurrency = mockApi.basePrices[symbol]?.currency || currency; document.getElementById('detail-name').textContent = name; document.getElementById('detail-symbol').textContent = symbol; detailView.dataset.assetType = type; mainView.classList.add('hidden'); detailView.classList.remove('hidden'); if (type === 'crypto') loadCryptoUI(symbol, basePrice, originalCurrency); else if (type === 'stock') loadStockUI(symbol, basePrice, originalCurrency); return; }
+                const buyToggle = closest('#buy-toggle'); if(buyToggle) { const tradeUI = closest('.w-1\\/2.pl-1'), symbol = document.getElementById('detail-symbol').textContent; const assetType = detailView.dataset.assetType; let balance, balanceCurrency; if (appState.tradeMode === 'rwa') { balanceCurrency = 'KKRW'; balance = userWallet.assets['KKRW']?.quantity || 0; } else { if (assetType === 'crypto') { balanceCurrency = (appState.displayCurrency === 'Default') ? 'KRW' : appState.displayCurrency; balance = userWallet[balanceCurrency] || 0; } else { balanceCurrency = mockApi.basePrices[symbol].currency; balance = userWallet[balanceCurrency] || 0; } } tradeUI.querySelector('#buy-toggle').className = 'p-2 text-white font-bold bg-red-600 rounded'; tradeUI.querySelector('#sell-toggle').className = 'p-2 text-gray-700 font-bold bg-gray-200 rounded'; tradeUI.querySelector('#order-button').className = 'w-full p-3 text-white font-bold bg-red-600 rounded mt-2'; tradeUI.querySelector('#order-button').textContent = '매수'; tradeUI.querySelector('#available-label').textContent = '주문가능'; tradeUI.querySelector('#available-balance').textContent = `${balance?.toLocaleString(undefined, {maximumFractionDigits:2}) || 0} ${balanceCurrency}`; return; }
+                const sellToggle = closest('#sell-toggle'); if (sellToggle) { const tradeUI = closest('.w-1\\/2.pl-1'), symbol = document.getElementById('detail-symbol').textContent; tradeUI.querySelector('#sell-toggle').className = 'p-2 text-white font-bold bg-blue-600 rounded'; tradeUI.querySelector('#buy-toggle').className = 'p-2 text-gray-700 font-bold bg-gray-200 rounded'; tradeUI.querySelector('#order-button').className = 'w-full p-3 text-white font-bold bg-blue-600 rounded mt-2'; tradeUI.querySelector('#order-button').textContent = '매도'; const ownedAsset = userWallet.assets[symbol] || Object.values(userWallet.assets).find(a => a.rwaOriginalSymbol === symbol); const quantity = ownedAsset ? ownedAsset.quantity : 0; const ticker = ownedAsset ? ownedAsset.ticker : (mockApi.basePrices[symbol]?.name.split(' ')[0] || symbol); tradeUI.querySelector('#available-label').textContent = '매도가능'; tradeUI.querySelector('#available-balance').textContent = `${quantity.toLocaleString()} 개`; return; }
+                const orderButton = closest('#order-button'); if (orderButton) { const tradeUI = closest('.w-1\\/2.pl-1'), symbol = document.getElementById('detail-symbol').textContent, type = detailView.dataset.assetType; const quantity = parseFloat(tradeUI.querySelector('#quantity-input').value); const priceInDisplayCurrency = parseFloat(tradeUI.querySelector('#price-input').value); if (isNaN(quantity) || quantity <= 0) { alert('올바른 수량을 입력하세요.'); return; } if (appState.tradeMode === 'standard' && type === 'stock' && quantity % 1 !== 0) { alert('일반 주식 거래는 소수점 단위로 거래할 수 없습니다.'); return; } if (appState.tradeMode === 'rwa') { const priceInKKRW = priceInDisplayCurrency; const totalAmountInKKRW = priceInKKRW * quantity; const fee = totalAmountInKKRW * FEE_RATES.RWA; if (orderButton.textContent === '매수') { const totalWithFee = totalAmountInKKRW + fee; const kkrwWallet = userWallet.assets['KKRW']; if (!kkrwWallet || kkrwWallet.quantity < totalWithFee) { alert('KKRW 잔액이 부족합니다.'); return; } kkrwWallet.quantity -= totalWithFee; const originalAssetInfo = userWallet.assets[symbol] || mockApi.basePrices[symbol]; let rwaSymbol, rwaName, rwaTicker; if (appState.rwaTradeType === 'spot') { rwaSymbol = `RWA-SPOT:${symbol}`; rwaName = `[RWA 현물] ${originalAssetInfo.name}`; rwaTicker = `KA-${originalAssetInfo.ticker || originalAssetInfo.name.split(' ')[0]}`; } else { rwaSymbol = `RWA-FUTURES-${appState.leverage}-${appState.position}:${symbol}`; rwaName = `[RWA 선물] (${appState.leverage}x ${appState.position.toUpperCase()}) ${originalAssetInfo.name}`; rwaTicker = `KA-${originalAssetInfo.ticker || originalAssetInfo.name.split(' ')[0]}-${appState.leverage}${appState.position[0].toUpperCase()}`; } if (userWallet.assets[rwaSymbol]) { userWallet.assets[rwaSymbol].quantity += quantity; } else { userWallet.assets[rwaSymbol] = { name: rwaName, ticker: rwaTicker, quantity: quantity, rwaOriginalSymbol: symbol, isSpot: appState.rwaTradeType === 'spot' }; } alert(`RWA 매수 체결 완료! (수수료: ${fee.toFixed(4)} KKRW)`); closest('#buy-toggle').click(); } else { const netAmount = totalAmountInKKRW - fee; let rwaSymbolToSell; if (appState.rwaTradeType === 'spot') { rwaSymbolToSell = `RWA-SPOT:${symbol}`; } else { rwaSymbolToSell = `RWA-FUTURES-${appState.leverage}-${appState.position}:${symbol}`; } const ownedRwaAsset = userWallet.assets[rwaSymbolToSell]; if (!ownedRwaAsset || ownedRwaAsset.quantity < quantity) { alert('매도 가능한 RWA 토큰 수량이 부족합니다.'); return; } ownedRwaAsset.quantity -= quantity; if (userWallet.assets['KKRW']) { userWallet.assets['KKRW'].quantity += netAmount; } else { userWallet.assets['KKRW'] = { name: 'KKRW', ticker: 'KKRW', quantity: netAmount }; } if (ownedRwaAsset.quantity < 1e-9) { delete userWallet.assets[rwaSymbolToSell]; } alert(`RWA 매도 체결 완료! ${netAmount.toFixed(2)} KKRW가 입금되었습니다. (수수료: ${fee.toFixed(4)} KKRW)`); closest('#sell-toggle').click(); } } else { const assetType = detailView.dataset.assetType; let transactionCurrency, totalAmountInTransactionCurrency, fee; const feeRate = assetType === 'stock' ? FEE_RATES.STOCK : FEE_RATES.CRYPTO; if (assetType === 'crypto') { transactionCurrency = (appState.displayCurrency === 'Default') ? 'KRW' : appState.displayCurrency; totalAmountInTransactionCurrency = priceInDisplayCurrency * quantity; fee = totalAmountInTransactionCurrency * feeRate; } else { transactionCurrency = mockApi.basePrices[symbol].currency; const priceInOriginalCurrency = (appState.displayCurrency === 'Default' || appState.displayCurrency === transactionCurrency) ? priceInDisplayCurrency : priceInDisplayCurrency * (exchangeRates[appState.displayCurrency] || 1) / (exchangeRates[transactionCurrency] || 1); totalAmountInTransactionCurrency = priceInOriginalCurrency * quantity; fee = totalAmountInTransactionCurrency * feeRate; } if (orderButton.textContent === '매수') { const totalWithFee = totalAmountInTransactionCurrency + fee; if ((userWallet[transactionCurrency] || 0) < totalWithFee) { alert('주문가능 금액이 부족합니다.'); return; } userWallet[transactionCurrency] -= totalWithFee; if (userWallet.assets[symbol]) { userWallet.assets[symbol].quantity += quantity; } else { const name = document.getElementById('detail-name').textContent; const ticker = symbol.includes(':') ? symbol.split(':')[1].replace('KRW','') : symbol.split('.')[0]; userWallet.assets[symbol] = { name, ticker, quantity }; } alert(`${quantity}주(개) 매수 체결 완료! (수수료: ${fee.toFixed(4)} ${transactionCurrency})`); closest('#buy-toggle').click(); } else { const netAmount = totalAmountInTransactionCurrency - fee; const ownedAsset = userWallet.assets[symbol]; if (!ownedAsset || ownedAsset.quantity < quantity) { alert('매도 가능 수량이 부족합니다.'); return; } ownedAsset.quantity -= quantity; userWallet[transactionCurrency] += netAmount; alert(`${quantity}주(개) 매도 체결 완료! (수수료: ${fee.toFixed(4)} ${transactionCurrency})`); closest('#sell-toggle').click(); } } return; }
+                const sendConfirmBtn = closest('#send-confirm-btn'); if (sendConfirmBtn) { const amountToSend = parseFloat(document.getElementById('send-amount-input').value); const assetSymbol = sendConfirmBtn.dataset.assetSymbol; if (isNaN(amountToSend) || amountToSend <= 0) { alert('올바른 수량을 입력하세요.'); return; } if (userWallet.assets[assetSymbol]) { if (amountToSend > userWallet.assets[assetSymbol].quantity) { alert('보유 수량이 부족합니다.'); return; } userWallet.assets[assetSymbol].quantity -= amountToSend; alert(`${amountToSend} ${userWallet.assets[assetSymbol].ticker} 송금이 완료되었습니다.\n남은 수량: ${userWallet.assets[assetSymbol].quantity.toLocaleString()}`); } else { if (amountToSend > userWallet[assetSymbol]) { alert('보유 금액이 부족합니다.'); return; } userWallet[assetSymbol] -= amountToSend; alert(`${amountToSend.toLocaleString()} ${assetSymbol} 송금이 완료되었습니다.\n남은 금액: ${userWallet[assetSymbol].toLocaleString()}`); } detailView.classList.add('hidden'); mainView.classList.remove('hidden'); const transferTab = document.querySelector('.nav-item[data-tab="transfer"]'); transferTab.click(); return; }
+                const friendItem = closest('.friend-item'); if(friendItem) { document.querySelectorAll('.friend-item').forEach(el => el.classList.remove('selected-kakao', 'selected-line')); const platformClass = friendItem.dataset.platform === 'kakao' ? 'selected-kakao' : 'selected-line'; friendItem.classList.add(platformClass); return; }
+                
+                const stakeBtn = closest('.stake-btn'); if (stakeBtn) { loadStakingUI(stakeBtn.dataset.assetSymbol); return; }
+                const stakeMaxBtn = closest('#stake-max-btn'); if(stakeMaxBtn) { const symbol = document.getElementById('detail-symbol').textContent; const availableQuantity = userWallet.assets[symbol]?.quantity || 0; document.getElementById('stake-quantity-input').value = availableQuantity; document.getElementById('stake-quantity-input').dispatchEvent(new Event('input')); return; }
+                const stakeDurationBtn = closest('.stake-duration-btn'); if (stakeDurationBtn) { document.querySelectorAll('.stake-duration-btn').forEach(btn => { btn.classList.remove('border-blue-500', 'bg-blue-100', 'text-blue-700'); btn.classList.add('border'); }); stakeDurationBtn.classList.add('border-blue-500', 'bg-blue-100', 'text-blue-700'); stakeDurationBtn.classList.remove('border'); document.getElementById('stake-quantity-input').dispatchEvent(new Event('input')); return; }
+                const confirmStakeBtn = closest('#confirm-stake-btn'); if (confirmStakeBtn) { const symbol = confirmStakeBtn.dataset.symbol; const quantity = parseFloat(document.getElementById('stake-quantity-input').value); const selectedDurationBtn = document.querySelector('.stake-duration-btn.border-blue-500'); const duration = parseInt(selectedDurationBtn.dataset.duration); const apy = parseFloat(selectedDurationBtn.dataset.apy); const asset = userWallet.assets[symbol]; if (isNaN(quantity) || quantity <= 0) { alert('올바른 수량을 입력하세요.'); return; } if (!asset || asset.quantity < quantity) { alert('보유 수량이 부족합니다.'); return; } asset.quantity -= quantity; if(asset.quantity < 1e-9) delete userWallet.assets[symbol]; userWallet.stakedAssets.push({ symbol: symbol, quantity: quantity, startDate: Date.now(), duration: duration, apy: apy }); alert(`${quantity.toLocaleString()} ${asset.ticker}를 ${duration}일간 스테이킹 시작합니다.`); detailView.classList.add('hidden'); mainView.classList.remove('hidden'); detailContentContainer.innerHTML = ''; const assetsTab = document.querySelector('.nav-item[data-tab="transfer"]'); if (assetsTab) { assetsTab.click(); } return; }
+                const unstakeBtn = closest('.unstake-btn'); if (unstakeBtn) { const confirmed = confirm('스테이킹을 중도 해지하면 보상을 받을 수 없습니다. 정말 해지하시겠습니까?'); if(confirmed) { const index = parseInt(unstakeBtn.dataset.stakeIndex); const stakedAsset = userWallet.stakedAssets.splice(index, 1)[0]; if(userWallet.assets[stakedAsset.symbol]) { userWallet.assets[stakedAsset.symbol].quantity += stakedAsset.quantity; } else { const originalAsset = mockApi.basePrices[stakedAsset.symbol]; userWallet.assets[stakedAsset.symbol] = { name: originalAsset.name, ticker: originalAsset.name.split(' ')[0], quantity: stakedAsset.quantity }; } renderSettingsUI(); } return; }
+                const sendBtn = closest('.send-btn'); if(sendBtn) { const assetSymbol = sendBtn.dataset.assetSymbol; const assetData = userWallet.assets[assetSymbol]; mainView.classList.add('hidden'); detailView.classList.remove('hidden'); loadSendUI(assetData, assetSymbol); return; }
+                const fiatSendBtn = closest('.fiat-send-btn'); if(fiatSendBtn) { const assetSymbol = fiatSendBtn.dataset.assetSymbol; const assetData = {name: assetSymbol === 'KRW' ? '대한민국 원' : '일본 엔', ticker: assetSymbol, quantity: userWallet[assetSymbol]}; mainView.classList.add('hidden'); detailView.classList.remove('hidden'); loadFiatSendUI(assetData); return; }
+                const currencyBtn = closest('.currency-btn'); if(currencyBtn) { appState.displayCurrency = currencyBtn.dataset.currency; refreshAllUI(); return; }
+                const linkBtn = closest('.link-account-btn'); if(linkBtn) { appState.linkedAccounts[linkBtn.dataset.platform] = !appState.linkedAccounts[linkBtn.dataset.platform]; renderSettingsUI(); return; }
+                const tradeModeToggle = closest('#trade-mode-toggle'); if(tradeModeToggle) { appState.tradeMode = appState.tradeMode === 'standard' ? 'rwa' : 'standard'; appState.rwaTradeType = 'spot'; const slider = document.getElementById('trade-mode-slider'); const labels = tradeModeToggle.querySelectorAll('div.z-10'); const tradeUiWrapper = document.getElementById('trade-ui-wrapper'); const symbol = document.getElementById('detail-symbol').textContent; const currency = mockApi.basePrices[symbol].currency; const currentPrice = mockApi.basePrices[symbol].price; if(appState.tradeMode === 'rwa') { slider.classList.remove('left-0'); slider.classList.add('left-1/2'); labels[0].classList.remove('text-blue-600', 'font-bold'); labels[0].classList.add('text-gray-600', 'font-semibold'); labels[1].classList.add('text-blue-600', 'font-bold'); labels[1].classList.remove('text-gray-600', 'font-semibold'); } else { slider.classList.remove('left-1/2'); slider.classList.add('left-0'); labels[1].classList.remove('text-blue-600', 'font-bold'); labels[1].classList.add('text-gray-600', 'font-semibold'); labels[0].classList.add('text-blue-600', 'font-bold'); labels[0].classList.remove('text-gray-600', 'font-semibold'); } const newTradeUiHtml = getTradeUiHtml(currentPrice, currency, symbol); tradeUiWrapper.outerHTML = newTradeUiHtml; return; }
+                const swapBtn = closest('.swap-rwa-btn'); if (swapBtn) { const listItem = swapBtn.closest('li'); const rwaSymbol = listItem.dataset.rwaSymbol; listItem.innerHTML = `<div class="w-full flex items-center space-x-2"><input type="number" class="swap-quantity-input w-full p-2 border rounded" placeholder="수량 입력"><button class="max-swap-btn bg-gray-200 px-3 py-2 text-sm rounded" data-rwa-symbol="${rwaSymbol}">최대</button><button class="confirm-swap-btn bg-green-500 text-white px-3 py-2 text-sm rounded font-bold" data-rwa-symbol="${rwaSymbol}">확정</button><button class="cancel-swap-btn bg-gray-400 text-white px-3 py-2 text-sm rounded">취소</button></div>`; return; }
+                const confirmSwapBtn = closest('.confirm-swap-btn'); if(confirmSwapBtn) { const rwaSymbol = confirmSwapBtn.dataset.rwaSymbol; const rwaAsset = userWallet.assets[rwaSymbol]; const quantityToSwap = parseFloat(closest('li').querySelector('.swap-quantity-input').value); if (isNaN(quantityToSwap) || quantityToSwap <= 0) { alert('올바른 교환 수량을 입력하세요.'); return; } const integerQuantity = Math.floor(quantityToSwap); if (integerQuantity === 0) { alert('교환 수량은 반드시 1 이상이어야 합니다.'); return; } if (rwaAsset && rwaAsset.quantity >= integerQuantity) { const originalSymbol = rwaAsset.rwaOriginalSymbol; if(userWallet.assets[originalSymbol]) { userWallet.assets[originalSymbol].quantity += integerQuantity; } else { const originalAssetInfo = mockApi.basePrices[originalSymbol]; userWallet.assets[originalSymbol] = { name: originalAssetInfo.name, ticker: (originalAssetInfo.name.split(' ')[0]), quantity: integerQuantity }; } rwaAsset.quantity -= integerQuantity; if (rwaAsset.quantity < 1e-9) { delete userWallet.assets[rwaSymbol]; } alert(`${rwaAsset.name} ${integerQuantity}개가 실물 자산으로 교환되었습니다.`); renderSettingsUI(); } else { alert('보유 수량이 부족합니다.'); } return; }
+                const cancelSwapBtn = closest('.cancel-swap-btn'); if(cancelSwapBtn) { renderSettingsUI(); return; }
+                const maxSwapBtn = closest('.max-swap-btn'); if(maxSwapBtn) { const rwaSymbol = maxSwapBtn.dataset.rwaSymbol; const rwaAsset = userWallet.assets[rwaSymbol]; if(rwaAsset) { const inputEl = maxSwapBtn.closest('li').querySelector('.swap-quantity-input'); inputEl.value = Math.floor(rwaAsset.quantity); } return; }
+                const leverageBtn = closest('.leverage-btn'); if(leverageBtn) { appState.leverage = parseInt(leverageBtn.dataset.leverage); const buttons = closest('.grid').querySelectorAll('.leverage-btn'); buttons.forEach(btn => { btn.classList.remove('bg-blue-600', 'text-white'); btn.classList.add('bg-gray-200'); }); leverageBtn.classList.add('bg-blue-600', 'text-white'); leverageBtn.classList.remove('bg-gray-200'); return; }
+                const positionBtn = closest('.position-btn'); if(positionBtn) { appState.position = positionBtn.dataset.position; const buttons = closest('.grid').querySelectorAll('.position-btn'); buttons.forEach(btn => { btn.classList.remove('bg-red-600', 'bg-blue-600', 'text-white'); btn.classList.add('bg-gray-200'); }); positionBtn.classList.add(appState.position === 'long' ? 'bg-red-600' : 'bg-blue-600', 'text-white'); positionBtn.classList.remove('bg-gray-200'); return; }
+                const rwaTypeBtn = closest('.rwa-type-btn'); if (rwaTypeBtn) { appState.rwaTradeType = rwaTypeBtn.dataset.type; const tradeUiWrapper = document.getElementById('trade-ui-wrapper'); const symbol = document.getElementById('detail-symbol').textContent; const currency = mockApi.basePrices[symbol].currency; const currentPrice = mockApi.basePrices[symbol].price; const newTradeUiHtml = getTradeUiHtml(currentPrice, currency, symbol); tradeUiWrapper.outerHTML = newTradeUiHtml; return; }
+            });
+            
+            appContainer.addEventListener('input', (e) => {
+                const target = e.target;
+                if (target.matches('#search-input')) { const allStocks = Object.entries(mockApi.basePrices).filter(([, data]) => data.type === 'stock').map(([symbol, data]) => ({...data, symbol})); const filteredAssets = allStocks.filter(asset => Hangul.includes(asset.name, target.value)); displaySearchResults(filteredAssets); return; }
+                if (target.matches('#price-input, #quantity-input')) {
+                    const price = parseFloat(document.getElementById('price-input').value) || 0;
+                    const quantity = parseFloat(document.getElementById('quantity-input').value) || 0;
+                    const total = price * quantity;
+                    const primaryTotalEl = document.getElementById('primary-total');
+                    const secondaryTotalEl = document.getElementById('secondary-total');
+                    const tradeFeeEl = document.getElementById('trade-fee');
+                    const assetType = detailView.dataset.assetType;
+
+                    if (!primaryTotalEl) return;
+
+                    const currency = primaryTotalEl.textContent.split(' ')[1] || 'KRW';
+                    primaryTotalEl.textContent = `${total.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${currency}`;
+                    
+                    let fee = 0;
+                    let feeRate = 0;
+                    if (appState.tradeMode === 'rwa') {
+                        feeRate = FEE_RATES.RWA;
+                        fee = total * feeRate;
+                    } else {
+                        feeRate = assetType === 'stock' ? FEE_RATES.STOCK : FEE_RATES.CRYPTO;
+                        fee = total * feeRate;
+                    }
+
+                    if (tradeFeeEl) {
+                        tradeFeeEl.textContent = `${fee.toFixed(8)} ${currency}`;
+                    }
+                    
+                    if (secondaryTotalEl) {
+                        secondaryTotalEl.textContent = ''; 
+                        if (appState.tradeMode === 'rwa' && appState.displayCurrency !== 'KKRW') {
+                            const totalInKRW = total * exchangeRates.KKRW;
+                            const converted = convertToDisplayCurrency(totalInKRW, 'KRW');
+                            secondaryTotalEl.textContent = `(${converted.value.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${converted.currency})`;
+                        }
+                    }
+                    return;
+                }
+                if (target.matches('#stake-quantity-input')) {
+                    const quantity = parseFloat(target.value) || 0;
+                    const symbol = document.getElementById('detail-symbol').textContent;
+                    const selectedDurationBtn = document.querySelector('.stake-duration-btn.border-blue-500');
+                    if (!selectedDurationBtn) return;
+                    const duration = parseInt(selectedDurationBtn.dataset.duration);
+                    const apy = parseFloat(selectedDurationBtn.dataset.apy);
+                    const reward = quantity * (apy / 100) * (duration / 365);
+                    const asset = userWallet.assets[symbol] || Object.values(userWallet.assets).find(a => a.ticker === symbol.split(':')[1].replace('KRW', ''));
+                    document.getElementById('estimated-rewards').textContent = `${reward.toFixed(8)} ${asset.ticker}`;
+                }
+            });
+
+            updateAllPrices();
+        });
+    </script>
+</body>
+</html>
